@@ -1,0 +1,887 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>公交展示界面</title>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/jquery.bootstrap-autohidingnavbar.min.js"></script>
+	<script type="text/javascript" src = "assets/data/odmax_zfo.json"></script>
+    <script type="text/javascript" src = "assets/data/odmax_zfd.json"></script>
+    <script type="text/javascript" src = "assets/data/odmaxs.json"></script>
+    <script type="text/javascript" src = "assets/data/odmaxsps.json"></script>
+    <script type="text/javascript" src = "assets/data/zones.json"></script>
+	<script type="text/javascript" src = "assets/data/od_bus_others.json"></script>
+    <script src="assets/js/echarts.js"></script>
+    <script type="text/javascript" src = "assets/js/main.js"></script>
+	
+
+	<style type="text/css">
+	body{
+		background-color: #333;
+	}
+	.mainContent {
+		/*background-color: rgb(200,0,0);*/
+		width:100%;
+		height:900px;
+	}
+
+	#left {
+		/*background-color: rgb(0,200,0);*/
+		float:left;
+		height:100%;
+		width:70%;
+		padding:10px;
+		margin-left:5px;
+		margin-right:10px;
+	}
+	
+	#map {
+		/*background-color: rgb(0,200,0);*/
+		float:left;
+		height:80%;
+		width:100%;
+		padding:5px;
+		margin:5px;
+	}
+	
+	#fig3 {
+		/*background-color: rgb(0,200,70);*/
+		float:left;
+		height:20%;
+		width:100%;
+		padding:5px;
+		margin:5px;
+	}
+	
+	#right {
+		/*background-color: rgb(0,0,200);*/
+		float:left;
+		height:100%;
+		width:25%;
+		padding:10px;
+	}
+
+	#sel {
+		/*background-color: rgb(0,200,200);*/
+		height:7%;
+		width:100%;
+		padding:15px;
+		padding-top:10px;
+		
+		margin-bottom:5px;
+	}
+
+	#fig1 {
+		/*background-color: rgb(200,0,200);*/
+		height:25%;
+		width:100%;
+		padding:10px;
+		margin-bottom:5px;
+	}
+
+	#fig2 {
+		/*background-color: rgb(0,200,200);*/
+		height:25%;
+		width:100%;
+		padding:30px;
+	}
+	
+	#fig4 {
+		/*background-color: rgb(0,200,200);*/
+		height:25%;
+		width:100%;
+		padding:30px;
+	}
+
+	svg{
+		position:relative;
+	}
+	
+	#sel_font {
+		float:left;
+		color:white;
+		font-size:20px;
+		font-weight:bold;
+	}
+	
+	#sel_select {
+		float:left;
+		color:black;
+		font-size:20px;
+		
+	}
+
+	path {
+		stroke: #fff;
+		stroke-width: .5px;
+	}
+	 
+	path:hover {
+		fill-opacity: 0.8;
+	}
+
+	h1 {color:white;}
+	h2 {color:white;}
+
+	</style> 
+</head>
+<body>
+	<div class="mainContent">
+	<div id="left">
+		<div id="map"></div>
+		<div id="fig3"></div>
+	</div>
+	
+	<div id="right">
+		<div id="sel">
+			<p id="sel_font">请选择日期：  </p>
+			<p>
+			<select id="sel_select" name="">
+				<option value="volvo">2015年5月1日</option>
+				<option value="saab">2015年5月2日</option>
+				<option value="opel">2015年5月3日</option>
+				<option value="audi">2015年5月4日</option>
+			</select>
+			</p>
+		</div>
+		<div id="fig1"></div>
+		<div id="fig4"></div>
+		<div id="fig2"></div>
+	</div>
+	</div>
+</body>
+
+	
+<script type="text/javascript">
+	(function(){
+        var lineso = odmax_zfo.map(function(o){
+            return o.map(function(p){
+                return [{ name : "北京市市委市政府周边"},{ name : zones[p.d-1].name , value : p.flow}];
+            });
+        });
+
+        var linesd = odmax_zfd.map(function(o){
+            return o.map(function(p){
+                return [{ name : zones[p.o-1].name},{ name : "北京市市委市政府周边" , value : p.flow}];
+            });
+        });
+
+
+        var liness = odmaxs.map(function(o){
+            return o.map(function(p){
+                return [{ name : zones[p.o-1].name},{ name : zones[p.d-1].name , value : p.flow}];
+            });
+        });
+
+        var geodata = {};
+        zones.forEach(function(o){
+            _name = o.name;
+            _centerX = o.centerX;
+            _centerY = o.centerY;
+            geodata[_name] = [_centerX,_centerY];
+        });
+		
+		geodata["北京市市委市政府周边"] = [116.413624,39.910837];
+
+        var datearr = [];
+        for (var i=0;i < 24; i++){
+            if(i<10){
+                datearr.push("2015-04-20 0"+i+":00:00");
+                datearr.push("2015-04-20 0"+i+":30:00");
+            }else{
+                datearr.push("2015-04-20 "+i+":00:00");
+                datearr.push("2015-04-20 "+i+":30:00");           
+            }
+  
+        }
+        var pointsomap0 = lineso[0].reduce(function(p,c){
+            p[c[0].name] = (p[c[0].name])?(p[c[0].name]+c[1].value):(c[1].value);
+            return p;
+        },{});
+
+        var pointso0 = [];
+        for (var name in pointsomap0){
+            pointso0.push({name : name , value : pointsomap0[name] });
+        }
+
+        var pointsdmap0 = linesd[0].reduce(function(p,c){
+            p[c[1].name] = (p[c[1].name])?(p[c[1].name]+c[1].value):(c[1].value);
+            return p;
+        },{});
+
+        var pointsd0 = [];
+        for (var name in pointsdmap0){
+            pointsd0.push({name : name , value : pointsdmap0[name] });
+        }
+
+        var sps = odmaxsps.map(function(o){
+            return o.map(function(o){
+                return {name:zones[o.p-1].name,value:o.v};
+            });
+        });
+        // .map(function(o){
+        //     return {name:o.name,value:o.value};
+        // });
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/map',
+				'echarts/chart/line',
+				'echarts/chart/bar',
+				'echarts/chart/pie',
+            ],
+
+			function (echarts, BMapExtension) {
+			// 基于准备好的dom，初始化echarts图表
+			// 初始化地图
+			var mapcon = document.getElementById("map");
+			var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+				enableMapClick: false
+			});
+			var map = BMapExt.getMap();
+			var container = BMapExt.getEchartsContainer();
+
+			var startPoint = {x:116.404323,y:39.907566};
+			var point = new BMap.Point(startPoint.x, startPoint.y);
+			map.centerAndZoom(point, 11);
+			map.enableScrollWheelZoom(true);
+			// 地图自定义样式
+			map.setMapStyle({
+				styleJson: [
+					  {
+						   "featureType": "water",
+						   "elementType": "all",
+						   "stylers": {
+								"color": "#044161"
+						   }
+					  },
+					  {
+						   "featureType": "land",
+						   "elementType": "all",
+						   "stylers": {
+								"color": "#000000"
+						   }
+					  },
+					  {
+						   "featureType": "boundary",
+						   "elementType": "geometry",
+						   "stylers": {
+								"color": "#064f85"
+						   }
+					  },
+					  {
+						   "featureType": "railway",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "highway",
+						   "elementType": "geometry",
+						   "stylers": {
+								"color": "#000000"
+						   }
+					  },
+					  {
+						   "featureType": "highway",
+						   "elementType": "geometry.fill",
+						   "stylers": {
+								"color": "#005b96",
+								"lightness": 1
+						   }
+					  },
+					  {
+						   "featureType": "highway",
+						   "elementType": "labels",
+						   "stylers": {
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "arterial",
+						   "elementType": "geometry",
+						   "stylers": {
+								"color": "#000000"
+						   }
+					  },
+					  {
+						   "featureType": "arterial",
+						   "elementType": "geometry.fill",
+						   "stylers": {
+								"color": "#00508b"
+						   }
+					  },
+					  {
+						   "featureType": "poi",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "on"
+						   }
+					  },
+					  {
+						   "featureType": "green",
+						   "elementType": "all",
+						   "stylers": {
+								"color": "#056197",
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "subway",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "on"
+						   }
+					  },
+					  {
+						   "featureType": "manmade",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "local",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "arterial",
+						   "elementType": "labels",
+						   "stylers": {
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "boundary",
+						   "elementType": "geometry.fill",
+						   "stylers": {
+								"color": "#029fd4"
+						   }
+					  },
+					  {
+						   "featureType": "building",
+						   "elementType": "all",
+						   "stylers": {
+								"color": "#1a5787"
+						   }
+					  },
+					  {
+						   "featureType": "label",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "on"
+						   }
+					  }
+				]
+			});
+            
+			//地图的option
+			option = {
+				timeline:{
+				data:datearr,
+					label : {
+						formatter : function(s) {
+							return s.slice(11, 16);
+						},
+						textStyle : {
+							color: '#fff'
+						}
+					},
+					autoPlay : true,
+					playInterval : 5000
+				},
+
+				options:[
+					{
+
+						color: ['gold','aqua','lime'],
+						title:{
+							text: '重庆城南家园出行',
+							subtext:'时间：2015年4月20日 星期一',
+							x:'center',
+							textStyle : {
+								"color": "#fff",
+								"fontSize": 40,
+								"fontFamily": "黑体"
+							},
+							subtextStyle : {
+								"fontSize": 20,
+								"fontFamily": "楷体"
+							}
+						},
+						tooltip : {
+							trigger: 'item',
+							formatter: '{b}'
+						},
+						legend: {
+							orient: 'vertical',
+							x:'left',
+							data:['以该点为出发地','以该点为目的地'],
+							selectedMode: 'single',
+							selected:{
+								'以该点为目的地' : false
+							},
+							textStyle : {
+								color: '#fff',
+								"fontSize": 16
+							}
+						},
+						toolbox: {
+							show : true,
+							orient : 'vertical',
+							x: 'right',
+							y: 'center',
+							feature : {
+								mark : {show: true},
+								dataView : {show: true, readOnly: false},
+								restore : {show: true},
+								saveAsImage : {show: true}
+							}
+						},
+						dataRange: {
+							min : 0,
+							max : 300,
+							calculable : true,
+							x: 100,
+							y: document.body.clientHeight*0.3,
+							color: ['#ff3333', 'orange', 'yellow','lime','aqua'],
+							textStyle:{
+								color:'#fff'
+							}
+						},
+						series : [
+						{
+							name: '以该点为出发地',
+							type: 'map',
+							mapType: 'none',
+							itemStyle:{
+								normal:{
+									borderColor:'rgba(100,149,237,1)',
+									borderWidth:0.5,
+									areaStyle:{
+										color: '#1b1b1b'
+									}
+								}
+							},
+							data:[],
+							markLine : {
+								smooth:true,
+								symbol: ['circle', 'circle'],  
+								symbolSize : 1,
+								effect : {
+									show: true,
+									scaleSize: 1,
+									period: 30,
+									color: '#fff',
+									shadowBlur: 10
+								},
+								itemStyle : {
+									normal: {
+										borderWidth:1,
+										lineStyle: {
+											type: 'solid',
+											shadowBlur: 5
+										}
+									}
+								},
+								data : lineso[0],
+							},
+							geoCoord: geodata,
+							markPoint : {
+								symbol:'emptyCircle',
+								symbolSize : function (v){
+									return Math.min(5 + v/400,20)
+								},
+								effect : {
+									show: true,
+									shadowBlur : 0
+								},
+								itemStyle:{
+									normal:{
+										label:{show:false}
+									},
+									emphasis: {
+										label:{position:'top'}
+									}
+								},
+								//data : lineso[0].map(function(o){return o[0]})
+								data: pointso0
+							}
+						},{
+							name: '以该点为目的地',
+							type: 'map',
+							mapType: 'none',
+							itemStyle:{
+								normal:{
+									borderColor:'rgba(100,149,237,1)',
+									borderWidth:0.5,
+									areaStyle:{
+										color: '#1b1b1b'
+									}
+								}
+							},
+							data:[],
+							markLine : {
+								smooth:true,
+								symbol: ['circle', 'circle'],  
+								symbolSize : 1,
+								effect : {
+									show: true,
+									scaleSize: 1,
+									period: 30,
+									color: '#fff',
+									shadowBlur: 10
+								},
+								itemStyle : {
+									normal: {
+										borderWidth:1,
+										lineStyle: {
+											type: 'solid',
+											shadowBlur: 5
+										}
+									}
+								},
+								data : linesd[0],
+							},
+							geoCoord: geodata,
+							markPoint : {
+								symbol:'emptyCircle',
+								symbolSize : function (v){
+									return Math.min(5 + v/200,30)
+								},
+								effect : {
+									show: true,
+									shadowBlur : 0
+								},
+								itemStyle:{
+									normal:{
+										label:{show:false}
+									},
+									emphasis: {
+										label:{position:'top'}
+									}
+								},
+								data : pointsd0
+							}
+						}
+					]
+				}]
+				
+			};
+			
+			var myChart1 = echarts.init(document.getElementById('fig1')); //条形图
+			var myChart2 = echarts.init(document.getElementById('fig3'));//堆积折线图
+			var myChart3 = echarts.init(document.getElementById('fig2'));//扇形图
+			var myChart4 = echarts.init(document.getElementById('fig4')); //条形图
+
+			
+
+
+			for (var i=1;i<48;i++){
+				var pointsomapi = lineso[i].reduce(function(p,c){
+					p[c[0].name] = (p[c[0].name])?(p[c[0].name]+c[1].value):(c[1].value);
+					return p;
+				},{});
+
+				var pointsoi = [];
+				for (var name in pointsomapi){
+					pointsoi.push({name : name , value : pointsomapi[name] });
+				}
+
+				var pointsdmapi = linesd[i].reduce(function(p,c){
+					p[c[1].name] = (p[c[1].name])?(p[c[1].name]+c[1].value):(c[1].value);
+					return p;
+				},{});
+
+				var pointsdi = [];
+				for (var name in pointsdmapi){
+					pointsdi.push({name : name , value : pointsdmapi[name] });
+				}
+				option.options.push({series:[
+						{
+							markLine:{data:lineso[i]},
+							markPoint:{
+								data:pointsoi
+							}
+						},{
+							markLine:{data:linesd[i]},
+							markPoint:{
+								data:pointsdi
+							}
+						}
+					]});
+				
+			}
+			
+			var myChart = BMapExt.initECharts(container);
+			BMapExt.setOption(option);
+			var ecConfig = require('echarts/config');
+			myChart.on(ecConfig.EVENT.TIMELINE_CHANGED, function(o){
+			  //alert(o.currentIndex);
+			 var baroption = {
+			 //backgroundColor: 'rgba(0,0,0,0.8)',
+				title : {
+					text: '热点站点客流',
+				},
+				tooltip : {
+					//backgroundColor: 'rgba(255,255,255,0.8)',
+					trigger: 'axis',
+					textStyle:{color:'#fff'}
+				},
+				legend: {
+					data:['出发量'],
+					textStyle:{color:'#fff'}
+				},
+				calculable : true,
+				yAxis : [
+					{
+						type : 'value',
+						splitLine:{ 
+							show:false 
+						},
+						boundaryGap : [0, 0.01],
+						axisLabel:{textStyle:{color:'#fff'}}
+					}
+				],
+				xAxis : [
+					{
+						type : 'category',
+						splitLine:{ 
+							show:false 
+						},
+						data : hot_stations,
+						axisLabel:{
+							textStyle:{color:'#fff'},
+							rotate:30
+						
+						}
+					}
+				],
+				grid:{
+					//backgroundColor:'rgba(10,10,10,0.8)',
+					borderWidth:0
+				},
+				series : [
+					{
+						name:'出发量',
+						type:'bar',
+						data:stopso[o.currentIndex],
+						itemStyle : {  
+							normal : {  
+								color : '#006699',  
+								
+							}  
+						}
+					}
+				]
+			};
+			
+			var option4 = {
+			 //backgroundColor: 'rgba(0,0,0,0.8)',
+				title : {
+					text: '热点站点客流',
+				},
+				tooltip : {
+					//backgroundColor: 'rgba(255,255,255,0.8)',
+					trigger: 'axis',
+					textStyle:{color:'#fff'}
+				},
+				legend: {
+					data:['到达量'],
+					textStyle:{color:'#fff'}
+				},
+				calculable : true,
+				yAxis : [
+					{
+						type : 'value',
+						splitLine:{ 
+							show:false 
+						},
+						boundaryGap : [0, 0.01],
+						axisLabel:{textStyle:{color:'#fff'}}
+					}
+				],
+				xAxis : [
+					{
+						type : 'category',
+						splitLine:{ 
+							show:false 
+						},
+						data : hot_stations,
+						axisLabel:{
+							textStyle:{color:'#fff'},
+							rotate:30
+						
+						}
+					}
+				],
+				grid:{
+					//backgroundColor:'rgba(10,10,10,0.8)',
+					borderWidth:0
+				},
+				series : [
+					
+					{
+						name:'到达量',
+						type:'bar',
+						data:stopsd[o.currentIndex],
+						itemStyle : {  
+							normal : {  
+								color : '#006600',  
+								
+							}  
+						}
+					}
+				]
+			};
+			
+			var footoption = {
+			//backgroundColor: 'rgba(0,0,0,0.8)',
+				title : {
+					text: '城南家园分时段客流',
+					textStyle:{color:'#fff'}
+				},
+				tooltip : {
+					trigger: 'axis',
+					textStyle:{color:'#fff'}
+				},
+				legend: {
+					data:['出发量','到达量'],
+					textStyle:{color:'#fff'}
+				},
+				calculable : true,
+				xAxis : [
+					{
+						type : 'category',
+						splitLine:{ 
+							show:false 
+						},
+						boundaryGap : false,
+						data : ['0:00','0:30','1:00','1:30','2:00','2:30','3:00','3:30','4:00','4:30','5:00','5:30','6:00','6:30','7:00','7:30','8:00','8:30','9:00','9:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30','23:00','23:30','24:00'],
+						axisLabel:{textStyle:{color:'#fff'}}
+					}
+				],
+				yAxis : [
+					{
+						type : 'value',
+						splitLine:{ 
+							show:false 
+						},
+						axisLabel:{textStyle:{color:'#fff'}}
+					}
+				],
+				grid:{
+					//backgroundColor:'rgba(10,10,10,0.8)',
+					borderWidth:0
+				},
+				series : [
+					{
+						name:'出发量',
+						type:'line',
+						smooth:true,
+						itemStyle: {normal: {areaStyle: {type: 'default'}}},
+						data:otimeline.slice(0,o.currentIndex+1)
+					},
+					{
+						name:'到达量',
+						type:'line',
+						smooth:true,
+						itemStyle: {normal: {areaStyle: {type: 'default'}}},
+						data:dtimeline.slice(0,o.currentIndex+1)
+					}
+				]
+			};
+			
+			var pieoption = {
+				title : {
+					text: '某站点用户访问来源',
+					x:'center',
+					textStyle:{color:'#fff'}
+				},
+				tooltip : {
+					trigger: 'item',
+					formatter: "{a} <br/>{b} : {c} ({d}%)"
+				},
+				legend: {
+					orient : 'vertical',
+					x : 'left',
+					data:['直接访问','邮件营销','联盟广告','视频广告','搜索引擎'],
+					textStyle:{color:'#fff'}
+				},
+				
+				calculable : true,
+				series : [
+					{
+						name:'访问来源',
+						type:'pie',
+						radius : '55%',
+						center: ['50%', '60%'],
+						data:[
+							{value:0, name:'直接访问'},
+							{value:0, name:'邮件营销'},
+							{value:0, name:'联盟广告'},
+							{value:0, name:'视频广告'},
+							{value:0, name:'搜索引擎'}
+						]
+					}
+				]
+			};
+				myChart1.setOption(baroption);
+				myChart2.setOption(footoption);
+				myChart3.setOption(pieoption);
+				myChart4.setOption(option4);
+				
+			  var i = o.currentIndex;
+			  var pointsomapi = lineso[i].reduce(function(p,c){
+					p[c[0].name] = (p[c[0].name])?(p[c[0].name]+c[1].value):(c[1].value);
+					return p;
+				},{});
+
+				var pointsoi = [];
+				for (var name in pointsomapi){
+					pointsoi.push({name : name , value : pointsomapi[name] });
+				}
+
+				var pointsdmapi = linesd[i].reduce(function(p,c){
+					p[c[1].name] = (p[c[1].name])?(p[c[1].name]+c[1].value):(c[1].value);
+					return p;
+				},{});
+
+				var pointsdi = [];
+				for (var name in pointsdmapi){
+					pointsdi.push({name : name , value : pointsdmapi[name] });
+				}
+				
+			});
+				
+		});
+	}
+)();
+
+</script>
+
+
+</html>

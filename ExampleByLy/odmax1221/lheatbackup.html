@@ -1,0 +1,571 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>北京市居住地分布分析</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <script type="text/javascript" src = "assets/data/lheat.json"></script>
+    <script type="text/javascript" src = "assets/data/lheat_g.json"></script>
+    <script type="text/javascript" src = "assets/data/zones.json"></script>
+    <script type="text/javascript" src = "assets/data/lheat_jtxq.json"></script>
+    <script type="text/javascript" src = "assets/data/lheat_tz_jtxq.json"></script>
+    <script type="text/javascript" src = "assets/data/ldensity_jtxq.json"></script>
+    <script type="text/javascript" src = "assets/data/ldensity_tz_jtxq.json"></script>
+    <script type="text/javascript" src = "assets/data/wheat_jtxq.json"></script>
+    <script type="text/javascript" src = "assets/data/wheat_tz_jtxq.json"></script>
+    <script type="text/javascript" src = "assets/data/wdensity_jtxq.json"></script>
+    <script type="text/javascript" src = "assets/data/wdensity_tz_jtxq.json"></script>
+    <script src="assets/js/echarts.js"></script>
+    <script type="text/javascript" src = "assets/js/main.js"></script>
+    <style>
+        body{
+            padding:0;
+            margin: 0;
+        }
+        .sidebar{
+        position:absolute;
+        top:0;
+        right:0;
+        width:300px;
+        max-height:87%;
+        z-index:200;
+        background-color:rgba(10,10,10,0.8);
+        color:#fff;
+        padding:20px;
+        overflow-y:scroll;
+        }
+    </style>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div class="sidebar" id="sidebar" style="color:white;font-family:幼圆;font-size:20px">
+      居住地热度top10:
+      <br><br>
+      <input type="radio" name="identity" value="密度" onclick='byDensity()' checked="checked" />按密度 
+      <input type="radio" name="identity" onclick="byCount()" value="总数" />按总数
+      <table cellspacing="15" style="color:white;font-family:黑体;font-size:18px">
+        <tr>
+          <th id="name1" align="left" width="150px"></th>
+          <th id="density1" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="image1" align="left" width="150px"></th>
+          <th id="count1" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="name2" align="left" width="150px"></th>
+          <th id="density2" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="image2" align="left" width="150px"></th>
+          <th id="count2" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="name3" align="left" width="150px"></th>
+          <th id="density3" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="image3" align="left" width="150px"></th>
+          <th id="count3" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="name4" align="left" width="150px"></th>
+          <th id="density4" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="image4" align="left" width="150px"></th>
+          <th id="count4" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="name5" align="left" width="150px"></th>
+          <th id="density5" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="image5" align="left" width="150px"></th>
+          <th id="count5" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="name6" align="left" width="150px"></th>
+          <th id="density6" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="image6" align="left" width="150px"></th>
+          <th id="count6" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="name7" align="left" width="150px"></th>
+          <th id="density7" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="image7" align="left" width="150px"></th>
+          <th id="count7" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="name8" align="left" width="150px"></th>
+          <th id="density8" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="image8" align="left" width="150px"></th>
+          <th id="count8" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="name9" align="left" width="150px"></th>
+          <th id="density9" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="image9" align="left" width="150px"></th>
+          <th id="count9" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="name10" align="left" width="150px"></th>
+          <th id="density10" align="right" width="20px"></th>
+        </tr>
+        <tr>
+          <th id="image10" align="left" width="150px"></th>
+          <th id="count10" align="right" width="20px"></th>
+        </tr>
+      </table>
+    </div>
+    <div id="main"></div>
+    <script type="text/javascript">
+        var maindiv = document.getElementById("main");
+        maindiv.style.height = document.body.clientHeight+"px";
+    </script>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+
+        var names = [];
+        var densities = [];
+        var images = [];
+        var counts = [];
+        names.push(document.getElementById("name1"));
+        names.push(document.getElementById("name2"));
+        names.push(document.getElementById("name3"));
+        names.push(document.getElementById("name4"));
+        names.push(document.getElementById("name5"));
+        names.push(document.getElementById("name6"));
+        names.push(document.getElementById("name7"));
+        names.push(document.getElementById("name8"));
+        names.push(document.getElementById("name9"));
+        names.push(document.getElementById("name10"));
+
+        densities.push(document.getElementById("density1"));
+        densities.push(document.getElementById("density2"));
+        densities.push(document.getElementById("density3"));
+        densities.push(document.getElementById("density4"));
+        densities.push(document.getElementById("density5"));
+        densities.push(document.getElementById("density6"));
+        densities.push(document.getElementById("density7"));
+        densities.push(document.getElementById("density8"));
+        densities.push(document.getElementById("density9"));
+        densities.push(document.getElementById("density10"));
+
+        images.push(document.getElementById("image1"));
+        images.push(document.getElementById("image2"));
+        images.push(document.getElementById("image3"));
+        images.push(document.getElementById("image4"));
+        images.push(document.getElementById("image5"));
+        images.push(document.getElementById("image6"));
+        images.push(document.getElementById("image7"));
+        images.push(document.getElementById("image8"));
+        images.push(document.getElementById("image9"));
+        images.push(document.getElementById("image10"));
+
+        counts.push(document.getElementById("count1"));
+        counts.push(document.getElementById("count2"));
+        counts.push(document.getElementById("count3"));
+        counts.push(document.getElementById("count4"));
+        counts.push(document.getElementById("count5"));
+        counts.push(document.getElementById("count6"));
+        counts.push(document.getElementById("count7"));
+        counts.push(document.getElementById("count8"));
+        counts.push(document.getElementById("count9"));
+        counts.push(document.getElementById("count10"));
+
+
+        //初始按密度排序
+        
+        for(var i = 0; i < 10; i++){
+          for(var name in zones){
+            if(zones[name].id == ldensity_jtxq[i].id){
+              names[i].innerText = zones[name].name;
+              break;
+            }
+          }
+          densities[i].innerText = ldensity_jtxq[i].density;
+          var count = 0;
+          for(var id in lheat_jtxq){
+            if(lheat_jtxq[id].id == ldensity_jtxq[i].id){
+              counts[i].innerText = lheat_jtxq[id].count;
+              count = lheat_jtxq[id].count;
+              break;
+            }
+          }
+          
+          var image1 = images[i];
+            while(count / 40000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person1.png"); 
+              image1.appendChild(img);
+              count -= 40000;
+            }
+            while(count / 30000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person2.png"); 
+              image1.appendChild(img);
+              count -= 30000;
+            }
+            while(count / 20000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person3.png"); 
+              image1.appendChild(img);
+              count -= 20000;
+            }
+            while(count / 10000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person4.png"); 
+              image1.appendChild(img);
+              count -= 10000;
+          }
+        }
+
+        function byDensity(){
+          for(var i = 0; i < 10; i++){
+            for(var name in zones){
+              if(zones[name].id == ldensity_jtxq[i].id){
+                names[i].innerText = zones[name].name;
+                break;
+              }
+            }
+            densities[i].innerText = ldensity_jtxq[i].density;
+            var count = 0;
+            for(var id in lheat_jtxq){
+              if(lheat_jtxq[id].id == ldensity_jtxq[i].id){
+                counts[i].innerText = lheat_jtxq[id].count;
+                count = lheat_jtxq[id].count;
+                break;
+              }
+            }
+            
+            var image1 = images[i];
+            image1.innerText = "";
+            while(count / 40000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person1.png"); 
+              image1.appendChild(img);
+              count -= 40000;
+            }
+            while(count / 30000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person2.png"); 
+              image1.appendChild(img);
+              count -= 30000;
+            }
+            while(count / 20000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person3.png"); 
+              image1.appendChild(img);
+              count -= 20000;
+            }
+            while(count / 10000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person4.png"); 
+              image1.appendChild(img);
+              count -= 10000;
+            }
+          }
+        }
+
+        function byCount(){
+          for(var i = 0; i < 10; i++){
+            for(var name in zones){
+              if(zones[name].id == lheat_jtxq[i].id){
+                names[i].innerText = zones[name].name;
+                break;
+              }
+            }
+            counts[i].innerText = lheat_jtxq[i].count;
+            var count = lheat_jtxq[i].count;
+            for(var id in lheat_jtxq){
+              if(lheat_jtxq[id].id == ldensity_jtxq[i].id){
+                densities[i].innerText = ldensity_jtxq[id].density;
+                break;
+              }
+            }
+            
+            var image1 = images[i];
+            image1.innerText = "";
+            while(count / 40000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person1.png"); 
+              image1.appendChild(img);
+              count -= 40000;
+            }
+            while(count / 30000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person2.png"); 
+              image1.appendChild(img);
+              count -= 30000;
+            }
+            while(count / 20000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person3.png"); 
+              image1.appendChild(img);
+              count -= 20000;
+            }
+            while(count / 10000 >= 1){
+              var img = document.createElement("img"); 
+              img.setAttribute("height", "50px"); 
+              img.setAttribute("src", "assets/img/person4.png"); 
+              image1.appendChild(img);
+              count -= 10000;
+            }
+          }
+        }
+
+        (function(){
+
+        var lheat_gf = lheat_g.filter(function(o) {return o.count>0.005});
+
+        var heatData = lheat_gf.map(function (o){
+          return [o.lng,o.lat,o.count/130000];
+        });
+
+        var geoData = lheat_gf.map(function (o){
+          return [o.lng,o.lat];
+        });
+
+
+        require.config({
+            paths: {
+                echarts: 'assets/js/'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/heatmap' // 
+            ],
+
+        function (echarts, BMapExtension) {
+    // 基于准备好的dom，初始化echarts图表
+        // 初始化地图
+        var mapcon = document.getElementById("main");
+        var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+            enableMapClick: false,
+            minZoom:13,maxZoom:13
+        });
+        var map = BMapExt.getMap();
+        var container = BMapExt.getEchartsContainer();
+
+        var startPoint = {x:116.404323,y:39.907566};
+        var point = new BMap.Point(startPoint.x, startPoint.y);
+        map.centerAndZoom(point, 13);
+        map.enableScrollWheelZoom(true);
+        // 地图自定义样式
+        map.setMapStyle({
+            styleJson: [
+                  {
+                       "featureType": "water",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#044161"
+                       }
+                  },
+                  {
+                       "featureType": "land",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#064f85"
+                       }
+                  },
+                  {
+                       "featureType": "railway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#005b96",
+                            "lightness": 1
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#00508b"
+                       }
+                  },
+                  {
+                       "featureType": "poi",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "green",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#056197",
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "subway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "manmade",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "local",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#029fd4"
+                       }
+                  },
+                  {
+                       "featureType": "building",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#1a5787"
+                       }
+                  },
+                  {
+                       "featureType": "label",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  }
+            ]
+        });
+
+        option = {
+    title : {
+        text: '北京市居住地分布分析',
+        x:'center',
+        textStyle: {
+            color: 'white',
+            "fontSize": 50,
+            "fontFamily": "黑体"
+        }
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: '{b}'
+    },
+    toolbox: {
+        show : true,
+        orient : 'vertical',
+        x: 'right',
+        y: 'center',
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    series : [
+        {
+            name: '北京',
+            type: 'heatmap',
+            hoverable: false,
+            data:heatData,
+            geo:geoData,
+            minAlpha: 0.001,
+            valueScale: 10000,
+            opacity: 0.6
+
+
+        }
+    ]
+};
+        
+        var myChart = BMapExt.initECharts(container);
+        BMapExt.setOption(option);
+                    
+    });
+})();
+    </script>
+</html>

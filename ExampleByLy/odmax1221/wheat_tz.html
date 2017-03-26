@@ -1,0 +1,295 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>通州区工作地分布分析</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+<!--     // <script type="text/javascript" src = "assets/data/wheat.json"></script> -->
+    <script type="text/javascript" src = "assets/data/wheat_tz_g.json"></script>
+    <script type="text/javascript" src = "assets/data/zones.json"></script>
+    <!-- // <script type="text/javascript" src = "assets/data/tz_geometry.json"></script> -->
+    <script src="assets/js/echarts.js"></script>
+    <script type="text/javascript" src = "assets/js/main.js"></script>
+    <style>
+        body{
+            padding:0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main"></div>
+    <script type="text/javascript">
+        var maindiv = document.getElementById("main");
+        maindiv.style.height = document.body.clientHeight+"px";
+    </script>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+        // console.log(tz_geometry);
+        (function(){
+
+        var wheat_tz_gf = wheat_tz_g.filter(function(o) {return o.count>0.0001});
+
+        var heatData = wheat_tz_gf.map(function (o){
+          return [o.lng,o.lat,o.count/45000];
+        });
+
+        var geoData = wheat_tz_gf.map(function (o){
+          return [o.lng,o.lat];
+        });
+        // var tz_polygon_data = [];
+        // tz_geometry.forEach(function(e){
+          // tz_polygon_data.push(new BMap.Point(e[0],e[1]));
+          // console.log(e[0]);
+        // });
+        // console.log(tz_polygon_data);
+        // var tz_polygon = new BMap.Polygon(tz_polygon_data, {strokeColor:"white", strokeWeight:2, strokeOpacity:0.8,fillColor:""});  //创建多边形
+        // console.log(tz_polygon);
+       
+
+        require.config({
+            paths: {
+                echarts: 'assets/js/'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/heatmap' // 
+            ],
+        
+
+        function (echarts, BMapExtension) {
+    // 基于准备好的dom，初始化echarts图表
+        // 初始化地图
+        var mapcon = document.getElementById("main");
+        var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+            enableMapClick: false,
+            minZoom:12,maxZoom:13
+        });
+        var map = BMapExt.getMap();
+        var container = BMapExt.getEchartsContainer();
+
+        var startPoint = {x:116.404323,y:39.907566};
+        var point = new BMap.Point(startPoint.x, startPoint.y);
+
+
+
+        // map.addOverlay(tz_polygon);
+         function getBoundary(){       
+          var bdary = new BMap.Boundary();
+          bdary.get("北京市通州区", function(rs){       //获取行政区域    
+            var count = rs.boundaries.length; //行政区域的点有多少个
+            if (count === 0) {
+              alert('未能获取当前输入行政区域');
+              return ;
+            }
+                  var pointArray = [];
+            for (var i = 0; i < count; i++) {
+              var ply = new BMap.Polygon(rs.boundaries[i], {strokeWeight: 2, strokeColor: "#ffffff",fillColor:""}); //建立多边形覆盖物
+              map.addOverlay(ply);  //添加覆盖物
+              pointArray = pointArray.concat(ply.getPath());
+            }    
+            // map.setViewport(pointArray);    //调整视野                 
+          });   
+        }
+      
+        getBoundary();
+         
+        map.centerAndZoom(point, 12);
+        map.enableScrollWheelZoom(true);
+        // 地图自定义样式
+        map.setMapStyle({
+            styleJson: [
+                  {
+                       "featureType": "water",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#044161"
+                       }
+                  },
+                  {
+                       "featureType": "land",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#064f85"
+                       }
+                  },
+                  {
+                       "featureType": "railway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#005b96",
+                            "lightness": 1
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#00508b"
+                       }
+                  },
+                  {
+                       "featureType": "poi",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "green",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#056197",
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "subway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "manmade",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "local",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#029fd4"
+                       }
+                  },
+                  {
+                       "featureType": "building",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#1a5787"
+                       }
+                  },
+                  {
+                       "featureType": "label",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  }
+            ]
+        });
+
+        option = {
+    title : {
+        text: '通州区工作地分布分析',
+        x:'center',
+        textStyle: {
+            color: 'white'
+        }
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: '{b}'
+    },
+    toolbox: {
+        show : true,
+        orient : 'vertical',
+        x: 'right',
+        y: 'center',
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    series : [
+        {
+            name: '北京',
+            type: 'heatmap',
+            hoverable: false,
+            data:heatData,
+            geo:geoData,
+            minAlpha: 0.001,
+            valueScale: 10000,
+            opacity: 0.6
+			
+
+
+        }
+    ]
+};
+        
+        var myChart = BMapExt.initECharts(container);
+        BMapExt.setOption(option);
+                    
+    });
+})();
+    </script>
+</html>

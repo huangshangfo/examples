@@ -1,0 +1,446 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>选择交通小区的辅助工具</title>
+
+	<link rel="stylesheet" href="css/leaflet.css"/>
+	<script type="text/javascript" src="js/d3.v3.min.js"></script>
+	<script type="text/javascript" src="js/queue.v1.min.js"></script>
+	<script type="text/javascript" src="js/topojson.v0.min.js"></script>
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+	<script src="json/geojson_461.json"></script>
+	
+	
+	
+    <script src="js/leaflet.js"></script>
+			
+    <script src="lib/baiduMapAPI-150-min.js"></script>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZQj4FGK1Guxf972nf7dmCjkS"></script>
+	<script type="text/javascript" src="http://developer.baidu.com/map/jsdemo/demo/convertor.js"></script>
+    <script src="layer/tile/leaflet-baidu.js"></script>
+	<style type="text/css">
+
+
+	#mapp {
+		/*background-color: rgb(0,200,0);*/
+		float:left;
+		height:800px;
+		width:100%;	
+	}
+
+
+	svg{
+		position:relative;
+	}
+
+
+	path {
+		stroke: #fff;
+		stroke-width: .5px;
+	}
+	 
+	path:hover {
+		fill-opacity: 0.8;
+	}
+
+	h2 {
+		font-size: 20px !important;
+		font-weight: bold !important;
+	}
+
+	</style>
+</head>
+
+
+<body>
+	<div id="mapp">
+
+</body>		
+
+	
+    <script type='text/javascript'>
+			
+			
+			document.getElementById("mapp").style.height = document.body.clientHeight+"px";
+			
+            var map = new L.map(
+                'mapp',
+                {
+                    'crs': L.CRS.BEPSG3857,
+                    // Coordinate of Tian'an Men of Baidu Coordinate
+                    'center': [39.915, 116.404],
+                    'zoom': 12,
+                    // zoomAnimation: false
+                }
+            );
+			
+            L.control.scale().addTo(map);
+            var baiduLayer = new L.TileLayer.BaiduLayer();
+            map.addLayer(baiduLayer);
+		
+			var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+				g = svg.append("g").attr("class", "leaflet-zoom-hide");
+				
+			var transform = d3.geo.transform({point: projectPoint}),
+			   path = d3.geo.path().projection(transform); 
+			
+			
+			
+			
+			//var marker = L.marker([116.38908775621832, 39.90355924938724]).addTo(map);
+			
+			
+			
+			
+			
+			
+			
+			d3_features = g.selectAll("path")
+				  .data(tazData.features)
+				.enter().append("path")
+				
+				/*
+				.attr("fill",function(d){
+					var id = d.properties.id;
+					var total = eval(flowToday[id-1].join('+'));
+					var flag = total/(zones[id-1].area/1000000);
+					if(flag > 3000){
+						return "#bd0000";
+					}
+					else{
+						return "#434343";
+					}
+				})
+				.attr("fill-opacity", function(d){
+					var id = d.properties.id;
+					var total = eval(flowToday[id-1].join('+'));
+					var flag = total/(zones[id-1].area/1000000);
+					if(flag > 30000){
+					    return 1;
+					}
+					else if(flag > 10000){
+					    return 0.75;
+					}
+					
+					else{
+						return 0.5;
+					}
+				})
+				*/
+				
+				.attr("fill",function(d){
+					return "#434343";
+				})
+				.attr("fill-opacity", function(d){
+					return 0.5;
+				})
+				
+				.on("mouseover",function(d){
+				
+					var position = path.centroid(d);
+					var tmp=   g.append("text")
+					  .attr("id", "tooltip")
+					  .attr("x", position[0]-10)
+					  .attr("y", position[1]-10)
+					  .attr("text-anchor", "middle")
+					  .attr("text-anchor", "middle")
+					  .attr("font-family", "sans-serif")
+					  .attr("font-size", "18px")
+					  .attr("font-weight", "bold")
+					  .attr("fill", "black")
+					  .text((d.properties.id + " " + d.properties.name));
+					  /*
+					  .text(function(){
+						if(d.properties.name == "null"){
+							return "";
+						}
+						else{
+							return d.properties.name;
+						}
+					  });
+					  */
+					  
+				})
+
+				.on("mouseout",function(){
+					g.selectAll("text")
+						.remove();
+					
+				})
+				.on("click", function(d){
+					//console.log(d3.select(this).attr("fill"));
+					d3.select(this)
+						.attr("fill",function(){
+							co = d3.select(this).attr("fill");
+							if(co == "#434343"){
+								return "red";
+							}
+							else{
+								return "#434343";
+							}
+						});
+				})
+				.on("dbclick", function(d){
+					d3.select(this)
+						.attr("fill","#434343");
+				});
+			map.on("viewreset", reset);
+			reset();
+			
+			
+			function reset() {
+				var bounds = path.bounds(tazData);
+				var	topLeft = bounds[0],
+					bottomRight = bounds[1];
+
+				//console.dir(svg);
+				
+				svg .attr("width", bottomRight[0] - topLeft[0])
+					.attr("height", bottomRight[1] - topLeft[1])
+					.style("left", topLeft[0] + "px")
+					.style("top", topLeft[1] + "px");
+
+				g   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+				d3_features.attr("d", path);
+				
+				var pp = map.latLngToLayerPoint(new L.LatLng(39.915087, 116.403963));
+
+				
+				//画点成功了 哦也~  这个remove必须要单写出来
+				g.selectAll("circle")
+				.remove()
+				
+				
+				var points = g
+				.append("circle")
+				.attr("class","point")  
+				.attr("cx",pp.x)  
+				.attr("cy",pp.y)  
+				.attr("r",5);
+				
+				
+				/*
+				g.selectAll("circle")
+				.data(tazData.features)
+				.enter()
+				.append("circle")
+				.attr("cx",function(d){
+					
+					var ppp = map.latLngToLayerPoint(new L.LatLng(d.properties.centerY, d.properties.centerX));
+					return ppp.x;
+				})  
+				.attr("cy",function(d){
+					var ppp = map.latLngToLayerPoint(new L.LatLng(d.properties.centerY, d.properties.centerX));
+					return ppp.y;
+				})  
+				.attr("r",5);
+				*/
+			}
+			
+			
+			function projectPoint(x, y) {
+
+				var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+				this.stream.point(point.x, point.y);
+			}
+
+			
+			//点击效果
+			function clicked(d) {
+				console.dir(d);	
+				document.getElementById('chart1').innerHTML = "";
+				showPOIpercent(d);
+				
+				
+			}		
+						
+						
+			//点击一个交通小区以后显示一个柱状图
+			/*
+			function showPOIpercent(id) {
+				// 基于准备好的dom，初始化echarts实例
+		        var myChart = echarts.init(document.getElementById('chart1'));
+
+		        // 指定图表的配置项和数据
+		        var option = {
+					
+					tooltip : {
+						trigger: 'axis'
+					},
+					toolbox: {
+						feature: {
+							saveAsImage: {}
+						}
+					},
+					grid: {
+						left: '3%',
+						right: '6%',
+						bottom: '2%',
+						containLabel: true
+					},
+					xAxis: [
+						{
+							type : 'category',
+							boundaryGap : false,
+							splitLine: {show: false},
+							data : ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24']
+						}
+					],
+					yAxis: [
+						{
+							type : 'value',
+							name: '人数',
+							splitLine: {show: false}
+						}
+					],
+					series: {
+					    name:'客流',
+						type:'line',
+						//lineStyle: {normal: {color: '#62cb31'}},
+						//areaStyle: {normal: {color: '#62cb31'}},
+						data:flowToday[id-1],
+						markPoint : {
+							data : [
+								{type : 'max', name: '最大值'},
+								{type : 'min', name: '最小值'}
+							]
+						},
+						markLine : {
+							data : [
+								{type : 'average', name: '平均值'}
+							]
+						}
+					}
+				};
+
+		        // 使用刚指定的配置项和数据显示图表。
+		        myChart.setOption(option);
+				
+				
+				var myChart2 = echarts.init(document.getElementById('chart2'));
+				
+				var option2 = {
+						
+						tooltip : {
+							trigger: 'item',
+							formatter: "{a} <br/>{b} : {c} ({d}%)"
+						},
+						legend: {
+							orient: 'horizontal',
+							left: 'center',
+							data: ['O','D']
+						},
+						series : [
+							{
+								name: 'OD人数及比例',
+								type: 'pie',
+								radius : '55%',
+								center: ['50%', '60%'],
+								data:[
+									{value:odToday[id][0], name:'O'},
+									{value:odToday[id][1], name:'D'},
+									
+								],
+								itemStyle: {
+									emphasis: {
+										shadowBlur: 10,
+										shadowOffsetX: 0,
+										shadowColor: 'rgba(0, 0, 0, 0.5)'
+									}
+								}
+							}
+						]
+					};
+				
+				myChart2.setOption(option2);
+				
+				var myChart3 = echarts.init(document.getElementById('chart3'));
+				
+				var option3 = {
+						tooltip : {
+							trigger: 'axis'
+						},
+						legend: {
+							data:['客流']
+						},
+						toolbox: {
+							show : true,
+							feature : {
+								dataView : {show: true, readOnly: false},
+								magicType : {show: true, type: ['line', 'bar']},
+								restore : {show: true},
+								saveAsImage : {show: true}
+							}
+						},
+						calculable : true,
+						xAxis : [
+							{
+								type : 'category',
+								data : ['周一','周二','周三','周四','周五','周六','周日']
+							}
+						],
+						yAxis : [
+							{
+								type : 'value'
+							}
+						],
+						series : [
+							{
+								name:'客流',
+								type:'bar',
+								//itemStyle: {normal: {color: '#62cb31'}},
+								data:flowWeek[id-1],
+								markPoint : {
+									data : [
+										{type : 'max', name: '最大值'},
+										{type : 'min', name: '最小值'}
+									]
+								},
+								markLine : {
+									data : [
+										{type : 'average', name: '平均值'}
+									]
+								}
+							},
+						]
+					};
+					
+				myChart3.setOption(option3);
+				
+				var myChart4 = echarts.init(document.getElementById('chart4'));
+				
+				var option4 = {
+						tooltip: {},
+						
+						radar: {
+							// shape: 'circle',
+							indicator: [
+							   { name: '教育', max: 100},
+							   { name: '医疗', max: 100},
+							   { name: '购物', max: 800},
+							   { name: '公共场所', max: 200},
+							   { name: '其他', max: 1000},
+							   
+							],
+							name:{textStyle:{color:'black'}}
+						},
+						series: [{
+							name: '区域属性',
+							type: 'radar',
+							areaStyle: {normal: {}},
+							data : [
+								{
+									value : [poicount[id].school, poicount[id].hospital, poicount[id].consume, poicount[id].publicplace, poicount[id].others],
+									name : '区域属性'
+								}
+								
+							]
+						}]
+					};
+					
+				myChart4.setOption(option4);
+			}*/
+
+        </script>

@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>1911交通小区</title>
+
+	<link rel="stylesheet" href="css/leaflet.css"/>
+	<script type="text/javascript" src="js/d3.v3.min.js"></script>
+	<script type="text/javascript" src="js/queue.v1.min.js"></script>
+	<script type="text/javascript" src="js/topojson.v0.min.js"></script>
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+	<script src="json/geojson_1911.json"></script>
+	
+	
+	
+    <script src="js/leaflet.js"></script>
+		
+    <script src="lib/baiduMapAPI-150-min.js"></script>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZQj4FGK1Guxf972nf7dmCjkS"></script>
+	<script type="text/javascript" src="http://developer.baidu.com/map/jsdemo/demo/convertor.js"></script>
+    <script src="layer/tile/leaflet-baidu.js"></script>
+	<style type="text/css">
+
+
+	#mapp {
+		/*background-color: rgb(0,200,0);*/
+		float:left;
+		height:800px;
+		width:100%;	
+	}
+
+	svg{
+		position:relative;
+	}
+
+
+	path {
+		stroke: #fff;
+		stroke-width: .5px;
+	}
+	 
+	path:hover {
+		fill-opacity: 0.8;
+	}
+
+	h2 {
+		font-size: 20px !important;
+		font-weight: bold !important;
+	}
+
+	</style>
+</head>
+
+
+<body>
+	<div id="mapp"></div>
+	
+</body>		
+
+	
+    <script type='text/javascript'>
+			
+			
+			document.getElementById("mapp").style.height = document.body.clientHeight+"px";
+			
+			var height = document.body.clientHeight;
+			var width = document.body.clientWidth;
+			
+            var map = new L.map(
+                'mapp',
+                {
+                    'crs': L.CRS.BEPSG3857,
+                    'center': [
+                        39.915, //Coordinate of Tian'an Men of Baidu Coordinate
+                        116.404
+                    ],
+                    'zoom': 13,
+                    'minZoom': 3,
+                    'maxZoom': 18,
+                    //todo: is that possible to add it in TileLayer Constructor?
+                    'baidu': true
+                }
+            );
+			
+            L.control.scale().addTo(map);
+            var baiduLayer = new L.TileLayer.BaiduLayer();
+            map.addLayer(baiduLayer);
+			
+            //L.marker([39.915, 116.404]).addTo(map);
+			
+			var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+				g = svg.append("g").attr("class", "leaflet-zoom-hide");
+
+			
+			var projection = d3.geo.mercator()  
+				.center([116.404, 39.915])  
+				.scale(600)  
+				.translate([width/2, height/2]);  
+				
+			var path = d3.geo.path()  
+                .projection(projection); 
+			
+			var peking = [116.404, 39.915];  
+			var proPeking = projection(peking);
+			
+			g.append("circle")  
+			.attr("fill", "black")  
+			.attr("cx",proPeking[0])  
+			.attr("cy",proPeking[1])  
+			.attr("r",8);  
+
+			
+        </script>

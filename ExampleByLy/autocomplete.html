@@ -1,0 +1,66 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>自动完成</title>
+	<script type="text/javascript" src="js/jquery/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="js/jquery/jquery-ui-1.10.3.min.js"></script>
+</head>
+<body>
+	<div class="table-responsive">
+                                                                        
+        <table class="table table-hover" id="ontologytable">
+            <thead>
+				<tr>
+					<th>#</th>
+					<th>列名</th>
+					<!--<th>Last Name</th>-->
+					<th>呵呵</th>
+				</tr>
+            </thead>
+            <tbody>
+			    <tr>
+				    <td>yaya</td>
+					<td>haha</td>
+					<td><input id="tags"></td>
+				</tr>
+            </tbody>
+                
+        </table>
+         
+    </div>
+</body>
+
+ <script>
+  $(function() {
+    var availableTags = [
+      "ActionScript",
+      "AppleScript",
+      "Asp",
+      "BASIC",
+      "C",
+      "C++",
+      "Clojure",
+      "COBOL",
+      "ColdFusion",
+      "Erlang",
+      "Fortran",
+      "Groovy",
+      "Haskell",
+      "Java",
+      "JavaScript",
+      "Lisp",
+      "Perl",
+      "PHP",
+      "Python",
+      "Ruby",
+      "Scala",
+      "Scheme"
+    ];
+    $( "#tags" ).autocomplete({
+      source: availableTags
+    });
+  });
+</script>
+
+</html>

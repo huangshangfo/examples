@@ -1,0 +1,84 @@
+<!--截屏目前出现的问题：百度地图的背景是截不下来的-->
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>截屏练习_热力图</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <script src="assets/echarts3/js/echarts.min.js"></script>
+	<script src="assets/echarts3/js/bmap.min.js"></script>
+	<script type="text/javascript" src = "assets/echarts3/data/heat_demo_echarts3.json"></script>
+	<script type="text/javascript" src="js/jquery.js"></script>
+	<script type="text/javascript" src="js/html2canvas.js"></script>
+	<script type="text/javascript" src="js/html2canvas.svg.js"></script>
+	<script type="text/javascript" src="js/canvas2image.js"></script>
+    <style>
+        * {margin:0; padding:0;}
+        body, html {width:100%;}
+    </style>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+	  <button type = "button" onclick="screenshot()">点击截屏</button>
+      <div class="main" id="main">  </div>
+	  
+    <script type="text/javascript">
+		
+        var maindiv = document.getElementById("main");
+        maindiv.style.height = document.body.clientHeight+"px";
+    </script>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+        
+		
+	var maindiv = document.getElementById("main");
+    maindiv.style.height = document.documentElement.clientHeight+"px";
+	var myChart = echarts.init(maindiv);
+	heatdata.forEach(function(item){
+		item[2] = item[2]*10;  //热力值是<=5的数
+	});
+    myChart.setOption(option = {
+        animation: false,
+        bmap: {
+            center: [116.404323, 39.907566],
+            zoom: 13,
+            roam: true
+        },
+        visualMap: {
+            show: false,
+            top: 'top',
+            min: 0,
+            max: 5,
+            seriesIndex: 0,
+            calculable: true,
+            inRange: {
+                color: ['blue', 'blue', 'green', 'yellow', 'red']
+            }
+        },
+        series: [{
+            type: 'heatmap',
+            coordinateSystem: 'bmap',
+            data: heatdata,
+            pointSize: 20,
+            blurSize: 40
+        }]
+    });
+    
+    var bmap = myChart.getModel().getComponent('bmap').getBMap();
+    bmap.addControl(new BMap.MapTypeControl()); 
+	
+	screenshot = function(){
+			html2canvas(document.getElementById("main"), {
+			  useCORS: true,
+			  onrendered: function(canvas) {
+				document.body.appendChild(canvas);
+				Canvas2Image.saveAsJPEG(canvas);
+			  }
+			});
+		}
+
+    </script>
+</html>

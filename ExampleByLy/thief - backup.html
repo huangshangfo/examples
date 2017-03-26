@@ -1,0 +1,774 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>北京市公共交通出行</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <script type="text/javascript" src = "assets/data/odmaxo.json"></script>
+    <script type="text/javascript" src = "assets/data/odmaxd.json"></script>
+    <script type="text/javascript" src = "assets/data/odmaxs.json"></script>
+    <script type="text/javascript" src = "assets/data/odmaxsps.json"></script>
+    <script type="text/javascript" src = "assets/data/zones.json"></script>
+    <script src="assets/js/echarts.js"></script>
+    <script type="text/javascript" src = "assets/js/main.js"></script>
+    <style type="text/css">
+        * {margin:0; padding:0;}
+		
+        body, html {width:100%;}
+		
+        .sidebar{
+        position:absolute;
+        top:0;
+        right:0;
+        width:200px;
+        max-height:87%;
+        z-index:200;
+        background-color:rgba(10,10,10,0.8);
+        color:#fff;
+        padding:20px;
+        overflow-y:scroll;
+        }
+		
+		#selid {
+			position:absolute;
+			right:250px;
+			padding:10px;
+			z-index:10;
+		}
+		
+		.sel_font {
+			float:left;
+			color:white;
+			font-size:25px;
+			font-weight:bold;
+		}
+		
+		.sel_select {
+			float:left;
+			color:black;
+			font-size:25px;
+			
+		}
+    </style>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <!--  <div id="main"></div>   -->
+	    <div id="selid">
+			<div class="sel_font">请选择用户：  </div>
+			
+			<select class="sel_select" id="yonghu">
+				<option value="all">所有乘客</option>
+				<option value="commuting">通勤</option>
+				<option value="shopping">购物</option>
+				<option value="entertainment">娱乐</option>
+			</select>
+			
+		</div>
+	    <div class="sidebar" id="sidebar" style="color:white;font-family:幼圆;font-size:20px">
+       出发地top5:
+       <table cellspacing="15" style="border-top:solid thin white;color:white;font-family:黑体;font-size:18px">
+         <tr>
+           <th id="o1n" align="left" width="150px"></th>
+           <th id="o1v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="o2n" align="left" width="150px"></th>
+           <th id="o2v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="o3n" align="left" width="150px"></th>
+           <th id="o3v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="o4n" align="left" width="150px"></th>
+           <th id="o4v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="o5n" align="left" width="150px"></th>
+           <th id="o5v" align="right" width="20px"></th>
+         </tr>
+       </table> 
+       <br><br>
+       目的地top5:
+       <table cellspacing="15" style="border-top:solid thin white;color:white;font-family:黑体;font-size:18px">
+         <tr>
+           <th id="d1n" align="left" width="150px"></th>
+           <th id="d1v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="d2n" align="left" width="150px"></th>
+           <th id="d2v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="d3n" align="left" width="150px"></th>
+           <th id="d3v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="d4n" align="left" width="150px"></th>
+           <th id="d4v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="d5n" align="left" width="150px"></th>
+           <th id="d5v" align="right" width="20px"></th>
+         </tr>
+       </table>
+       <br><br>
+       吞吐量top5:
+       <table cellspacing="15" style="border-top:solid thin white;color:white;font-family:黑体;font-size:18px">
+         <tr>
+           <th id="od1n" align="left" width="150px"></th>
+           <th id="od1v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="od2n" align="left" width="150px"></th>
+           <th id="od2v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="od3n" align="left" width="150px"></th>
+           <th id="od3v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="od4n" align="left" width="150px"></th>
+           <th id="od4v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="od5n" align="left" width="150px"></th>
+           <th id="od5v" align="right" width="20px"></th>
+         </tr>
+       </table>
+      </div>
+      <div class="main" id="main">  </div>
+
+    <script type="text/javascript">
+        var maindiv = document.getElementById("main");
+        maindiv.style.height = document.body.clientHeight+"px";
+    </script>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+        (function(){
+        var lineso = odmaxo.map(function(o){
+            return o.map(function(p){
+                return [{ name : zones[p.o-1].name},{ name : zones[p.d-1].name , value : p.flow}];
+            });
+        });
+
+        var linesd = odmaxd.map(function(o){
+            return o.map(function(p){
+                return [{ name : zones[p.o-1].name},{ name : zones[p.d-1].name , value : p.flow}];
+            });
+        });
+
+
+        var liness = odmaxs.map(function(o){
+            return o.map(function(p){
+                return [{ name : zones[p.o-1].name},{ name : zones[p.d-1].name , value : p.flow}];
+            });
+        });
+
+        var geodata = {};
+        zones.forEach(function(o){
+            _name = o.name;
+            _centerX = o.centerX;
+            _centerY = o.centerY;
+            geodata[_name] = [_centerX,_centerY];
+        });
+
+        var datearr = [];
+        for (var i=0;i < 24; i++){
+            if(i<10){
+                datearr.push("2015-04-20 0"+i+":00:00");
+                datearr.push("2015-04-20 0"+i+":30:00");
+            }else{
+                datearr.push("2015-04-20 "+i+":00:00");
+                datearr.push("2015-04-20 "+i+":30:00");           
+            }
+  
+        }
+        var pointsomap0 = lineso[0].reduce(function(p,c){
+            p[c[0].name] = (p[c[0].name])?(p[c[0].name]+c[1].value):(c[1].value);
+            return p;
+        },{});
+
+        var pointso0 = [];
+        for (var name in pointsomap0){
+            pointso0.push({name : name , value : pointsomap0[name] });
+        }
+
+        var pointsdmap0 = linesd[0].reduce(function(p,c){
+            p[c[1].name] = (p[c[1].name])?(p[c[1].name]+c[1].value):(c[1].value);
+            return p;
+        },{});
+
+        var pointsd0 = [];
+        for (var name in pointsdmap0){
+            pointsd0.push({name : name , value : pointsdmap0[name] });
+        }
+
+        var sps = odmaxsps.map(function(o){
+            return o.map(function(o){
+                return {name:zones[o.p-1].name,value:o.v};
+            });
+        });
+        // .map(function(o){
+        //     return {name:o.name,value:o.value};
+        // });
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/map' // 
+            ],
+
+        function (echarts, BMapExtension) {
+    // 基于准备好的dom，初始化echarts图表
+        // 初始化地图
+        var mapcon = document.getElementById("main");
+        var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+            enableMapClick: false
+        });
+        var map = BMapExt.getMap();
+        var container = BMapExt.getEchartsContainer();
+
+        var startPoint = {x:116.404323,y:39.907566};
+        var point = new BMap.Point(startPoint.x, startPoint.y);
+        map.centerAndZoom(point, 11);
+        map.enableScrollWheelZoom(true);
+        // 地图自定义样式
+        map.setMapStyle({
+            styleJson: [
+                  {
+                       "featureType": "water",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#044161"
+                       }
+                  },
+                  {
+                       "featureType": "land",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#064f85"
+                       }
+                  },
+                  {
+                       "featureType": "railway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#005b96",
+                            "lightness": 1
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#00508b"
+                       }
+                  },
+                  {
+                       "featureType": "poi",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "green",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#056197",
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "subway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "manmade",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "local",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#029fd4"
+                       }
+                  },
+                  {
+                       "featureType": "building",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#1a5787"
+                       }
+                  },
+                  {
+                       "featureType": "label",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  }
+            ]
+        });
+
+        option = {
+            timeline:{
+            data:datearr,
+                label : {
+                    formatter : function(s) {
+                        return s.slice(11, 16);
+                    },
+                    textStyle : {
+                        color: '#fff'
+                    }
+                },
+                autoPlay : true,
+                playInterval : 5000
+            },
+
+            options:[
+                {
+
+                    color: ['gold','aqua','lime'],
+                    title:{
+                        text: '北京市公共交通出行',
+                        subtext:'时间：2015年4月20日 星期一',
+                        x:'center',
+                        textStyle : {
+                            "color": "#fff",
+                            "fontSize": 50,
+                            "fontFamily": "黑体"
+                        },
+                        subtextStyle : {
+                            "fontSize": 30,
+                            "fontFamily": "楷体"
+                        }
+                    },
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: '{b}'
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        x:'left',
+                        data:['按o排序','按d排序','按总量排序'],
+                        selectedMode: 'single',
+                        selected:{
+                            '按d排序' : false,
+                            '按总量排序': false
+                        },
+                        textStyle : {
+                            color: '#fff',
+                            "fontSize": 20
+                        }
+                    },
+                    toolbox: {
+                        show : true,
+                        orient : 'vertical',
+                        x: 'right',
+                        y: 'center',
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    dataRange: {
+                        min : 0,
+                        max : 300,
+                        calculable : true,
+                        x: 100,
+                        y: document.body.clientHeight-250,
+                        color: ['#ff3333', 'orange', 'yellow','lime','aqua'],
+                        textStyle:{
+                            color:'#fff'
+                        }
+                    },
+                    series : [
+                    {
+                        name: '按o排序',
+                        type: 'map',
+                        mapType: 'none',
+                        itemStyle:{
+                            normal:{
+                                borderColor:'rgba(100,149,237,1)',
+                                borderWidth:0.5,
+                                areaStyle:{
+                                    color: '#1b1b1b'
+                                }
+                            }
+                        },
+                        data:[],
+                        markLine : {
+                            smooth:true,
+                            symbol: ['circle', 'circle'],  
+                            symbolSize : 1,
+                            effect : {
+                                show: true,
+                                scaleSize: 1,
+                                period: 30,
+                                color: '#fff',
+                                shadowBlur: 10
+                            },
+                            itemStyle : {
+                                normal: {
+                                    borderWidth:1,
+                                    lineStyle: {
+                                        type: 'solid',
+                                        shadowBlur: 5
+                                    }
+                                }
+                            },
+                            data : lineso[0],
+                        },
+                        geoCoord: geodata,
+                        markPoint : {
+                            symbol:'emptyCircle',
+                            symbolSize : function (v){
+                                return Math.min(5 + v/400,20)
+                            },
+                            effect : {
+                                show: true,
+                                shadowBlur : 0
+                            },
+                            itemStyle:{
+                                normal:{
+                                    label:{show:false}
+                                },
+                                emphasis: {
+                                    label:{position:'top'}
+                                }
+                            },
+                            //data : lineso[0].map(function(o){return o[0]})
+                            data: pointso0
+                        }
+                    },{
+                        name: '按d排序',
+                        type: 'map',
+                        mapType: 'none',
+                        itemStyle:{
+                            normal:{
+                                borderColor:'rgba(100,149,237,1)',
+                                borderWidth:0.5,
+                                areaStyle:{
+                                    color: '#1b1b1b'
+                                }
+                            }
+                        },
+                        data:[],
+                        markLine : {
+                            smooth:true,
+                            symbol: ['circle', 'circle'],  
+                            symbolSize : 1,
+                            effect : {
+                                show: true,
+                                scaleSize: 1,
+                                period: 30,
+                                color: '#fff',
+                                shadowBlur: 10
+                            },
+                            itemStyle : {
+                                normal: {
+                                    borderWidth:1,
+                                    lineStyle: {
+                                        type: 'solid',
+                                        shadowBlur: 5
+                                    }
+                                }
+                            },
+                            data : linesd[0],
+                        },
+                        geoCoord: geodata,
+                        markPoint : {
+                            symbol:'emptyCircle',
+                            symbolSize : function (v){
+                                return Math.min(5 + v/200,30)
+                            },
+                            effect : {
+                                show: true,
+                                shadowBlur : 0
+                            },
+                            itemStyle:{
+                                normal:{
+                                    label:{show:false}
+                                },
+                                emphasis: {
+                                    label:{position:'top'}
+                                }
+                            },
+                            data : pointsd0
+                        }
+                    },{
+                        name: '按总量排序',
+                        type: 'map',
+                        mapType: 'none',
+                        itemStyle:{
+                            normal:{
+                                borderColor:'rgba(100,149,237,1)',
+                                borderWidth:0.5,
+                                areaStyle:{
+                                    color: '#1b1b1b'
+                                }
+                            }
+                        },
+                        data:[],
+                        markLine : {
+                            smooth:true,
+                            symbol: ['circle', 'circle'],  
+                            symbolSize : 1,
+                            effect : {
+                                show: true,
+                                scaleSize: 1,
+                                period: 30,
+                                color: '#fff',
+                                shadowBlur: 10
+                            },
+                            itemStyle : {
+                                normal: {
+                                    borderWidth:1,
+                                    lineStyle: {
+                                        type: 'solid',
+                                        shadowBlur: 5
+                                    }
+                                }
+                            },
+                            data : liness[0],
+                        },
+                        geoCoord: geodata,
+                        markPoint : {
+                            symbol:'emptyCircle',
+                            symbolSize : function (v){
+                                return Math.min(5 + v/200,30)
+                            },
+                            effect : {
+                                show: true,
+                                shadowBlur : 0
+                            },
+                            itemStyle:{
+                                normal:{
+                                    label:{show:false}
+                                },
+                                emphasis: {
+                                    label:{position:'top'}
+                                }
+                            },
+                            data : sps[0]
+                        }
+                    }
+                ]
+            }]
+            
+        };
+
+        document.getElementById("o1n").innerText = pointso0[0].name;
+        document.getElementById("o1v").innerText = pointso0[0].value;
+        document.getElementById("o2n").innerText = pointso0[1].name;
+        document.getElementById("o2v").innerText = pointso0[1].value;
+        document.getElementById("o3n").innerText = pointso0[2].name;
+        document.getElementById("o3v").innerText = pointso0[2].value;
+        document.getElementById("o4n").innerText = pointso0[3].name;
+        document.getElementById("o4v").innerText = pointso0[3].value;
+        document.getElementById("o5n").innerText = pointso0[4].name;
+        document.getElementById("o5v").innerText = pointso0[4].value;
+
+        document.getElementById("d1n").innerText = pointsd0[0].name;
+        document.getElementById("d1v").innerText = pointsd0[0].value;
+        document.getElementById("d2n").innerText = pointsd0[1].name;
+        document.getElementById("d2v").innerText = pointsd0[1].value;
+        document.getElementById("d3n").innerText = pointsd0[2].name;
+        document.getElementById("d3v").innerText = pointsd0[2].value;
+        document.getElementById("d4n").innerText = pointsd0[3].name;
+        document.getElementById("d4v").innerText = pointsd0[3].value;
+        document.getElementById("d5n").innerText = pointsd0[4].name;
+        document.getElementById("d5v").innerText = pointsd0[4].value;
+
+        document.getElementById("od1n").innerText = sps[0][0].name;
+        document.getElementById("od1v").innerText = sps[0][0].value;
+        document.getElementById("od2n").innerText = sps[0][1].name;
+        document.getElementById("od2v").innerText = sps[0][1].value;
+        document.getElementById("od3n").innerText = sps[0][2].name;
+        document.getElementById("od3v").innerText = sps[0][2].value;
+        document.getElementById("od4n").innerText = sps[0][3].name;
+        document.getElementById("od4v").innerText = sps[0][3].value;
+        document.getElementById("od5n").innerText = sps[0][4].name;
+        document.getElementById("od5v").innerText = sps[0][4].value;
+
+
+        for (var i=1;i<48;i++){
+            var pointsomapi = lineso[i].reduce(function(p,c){
+                p[c[0].name] = (p[c[0].name])?(p[c[0].name]+c[1].value):(c[1].value);
+                return p;
+            },{});
+
+            var pointsoi = [];
+            for (var name in pointsomapi){
+                pointsoi.push({name : name , value : pointsomapi[name] });
+            }
+
+            var pointsdmapi = linesd[i].reduce(function(p,c){
+                p[c[1].name] = (p[c[1].name])?(p[c[1].name]+c[1].value):(c[1].value);
+                return p;
+            },{});
+
+            var pointsdi = [];
+            for (var name in pointsdmapi){
+                pointsdi.push({name : name , value : pointsdmapi[name] });
+            }
+            option.options.push({series:[
+                    {
+                        markLine:{data:lineso[i]},
+                        markPoint:{
+                            data:pointsoi
+                        }
+                    },{
+                        markLine:{data:linesd[i]},
+                        markPoint:{
+                            data:pointsdi
+                        }
+                    },{
+                        markLine:{data:liness[i]},
+                        markPoint:{
+                            data:sps[i]
+                        }
+                    }
+                ]});
+        }
+        
+        var myChart = BMapExt.initECharts(container);
+        BMapExt.setOption(option);
+        var ecConfig = require('echarts/config');
+        myChart.on(ecConfig.EVENT.TIMELINE_CHANGED, function(o){
+          //alert(o.currentIndex);
+          var i = o.currentIndex;
+          var pointsomapi = lineso[i].reduce(function(p,c){
+                p[c[0].name] = (p[c[0].name])?(p[c[0].name]+c[1].value):(c[1].value);
+                return p;
+            },{});
+
+            var pointsoi = [];
+            for (var name in pointsomapi){
+                pointsoi.push({name : name , value : pointsomapi[name] });
+            }
+
+            var pointsdmapi = linesd[i].reduce(function(p,c){
+                p[c[1].name] = (p[c[1].name])?(p[c[1].name]+c[1].value):(c[1].value);
+                return p;
+            },{});
+
+            var pointsdi = [];
+            for (var name in pointsdmapi){
+                pointsdi.push({name : name , value : pointsdmapi[name] });
+            }
+            document.getElementById("o1n").innerText = pointsoi[0].name;
+            document.getElementById("o1v").innerText = pointsoi[0].value;
+            document.getElementById("o2n").innerText = pointsoi[1].name;
+            document.getElementById("o2v").innerText = pointsoi[1].value;
+            document.getElementById("o3n").innerText = pointsoi[2].name;
+            document.getElementById("o3v").innerText = pointsoi[2].value;
+            document.getElementById("o4n").innerText = pointsoi[3].name;
+            document.getElementById("o4v").innerText = pointsoi[3].value;
+            document.getElementById("o5n").innerText = pointsoi[4].name;
+            document.getElementById("o5v").innerText = pointsoi[4].value;
+
+            document.getElementById("d1n").innerText = pointsdi[0].name;
+            document.getElementById("d1v").innerText = pointsdi[0].value;
+            document.getElementById("d2n").innerText = pointsdi[1].name;
+            document.getElementById("d2v").innerText = pointsdi[1].value;
+            document.getElementById("d3n").innerText = pointsdi[2].name;
+            document.getElementById("d3v").innerText = pointsdi[2].value;
+            document.getElementById("d4n").innerText = pointsdi[3].name;
+            document.getElementById("d4v").innerText = pointsdi[3].value;
+            document.getElementById("d5n").innerText = pointsdi[4].name;
+            document.getElementById("d5v").innerText = pointsdi[4].value;
+
+            document.getElementById("od1n").innerText = sps[i][0].name;
+            document.getElementById("od1v").innerText = sps[i][0].value;
+            document.getElementById("od2n").innerText = sps[i][1].name;
+            document.getElementById("od2v").innerText = sps[i][1].value;
+            document.getElementById("od3n").innerText = sps[i][2].name;
+            document.getElementById("od3v").innerText = sps[i][2].value;
+            document.getElementById("od4n").innerText = sps[i][3].name;
+            document.getElementById("od4v").innerText = sps[i][3].value;
+            document.getElementById("od5n").innerText = sps[i][4].name;
+            document.getElementById("od5v").innerText = sps[i][4].value;
+        });
+            
+    });
+})();
+    </script>
+</html>

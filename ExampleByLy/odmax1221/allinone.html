@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+body, html,#allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+.allpage {overflow:auto;width=730px;heigth=650px;}
+.title {text-align:center;}
+.pagelefttop {width:60%;height:100px;float:left;clear:left;}
+.pagerighttop {width:40%;height:100px;float:right;clear:right;}
+.photopicture {width:auto;height:120px;}
+.photo {width:180px;height:120px;}
+.linepicture {width:auto;height:180px;}
+.pie {width:auto;height:200px;}
+.pieTable {width:35%;heigth:200px;float:left;clear:left;}
+.piepicture {width:60%;height:200px;float:right;clear:right;}
+</style>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+<title>数据融合视图</title>
+<script src="js/jquery-1.8.3.min.js"></script>
+<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+<script type="text/javascript" src = "assets/data/zones.json"></script>
+<script type="text/javascript" src = "assets/data/odmcount.json"></script>
+<script type="text/javascript" src = "assets/data/poicount.json"></script>
+<script type="text/javascript" src = "assets/data/poicount2.json"></script>
+<script src="assets/js/echarts.js"></script>
+</head>
+<body>
+	<div class="container-fluid" style="height:100%">
+		<div class="row" style="height:100%">
+		  <div class="col-md-2" style="padding-top:10px;height:100%;">
+			<ul class="nav nav-tabs">
+			  <li role="presentation"><a href="#">检索</a></li>
+			  <li role="presentation" class="active"><a href="#">交通小区</a></li>
+			</ul>
+			<div id="panelzones" class="container-fluid" style="padding-top:10px; overflow-y:auto; max-height:93%;">
+			</div>
+		  </div>
+		  <div class="col-md-10" style="height:100%">
+				<div id="allmap"></div>
+		  </div>
+		</div>
+	</div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+	// 百度地图API功能
+	var map = new BMap.Map("allmap");    // 创建Map实例
+	map.centerAndZoom(new BMap.Point(116.404, 39.915), 11);  // 初始化地图,设置中心点坐标和地图级别
+	map.addControl(new BMap.MapTypeControl());   //添加地图类型控件
+	map.setCurrentCity("北京");          // 设置地图显示的城市 此项是必须设置的
+	map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+	var panelzones = $("#panelzones");
+	
+	zones.sort(czone).forEach(function(o,i){
+		panelzones.append("<div class='panel panel-success'>"+
+					  "<div class=\"panel-heading\">"+
+						"<h3 class=\"panel-title\"><a href=\"javascript:showzone("+i+");\">"+o.name+"</a></h3>"+
+					  "</div>"+
+					  "<div class=\"panel-body\">"+
+						"	<!-- Table -->"+
+						"  <table class=\"table\">"+
+						"	<tr>"+
+						"		<td>居住人口总数</td>"+
+						"		<td></td>"+
+						"	</tr>"+
+						"	<tr>"+
+						"		<td>工作人口总数</td>"+
+						"		<td></td>"+
+						"	</tr>"+
+						"	<tr>"+
+						"		<td>兴趣点总数</td>"+
+						"		<td></td>"+
+						"	</tr>"+
+						"	<tr>"+
+						"		<td>图片总数</td>"+
+						"		<td></td>"+
+						"	</tr>"+
+						"  </table>"+
+					  "</div>"+
+				"</div>"+
+			"</div>");
+	});
+	function showzone(id){
+		map.clearOverlays();  
+		var zone= zones[id];
+		var points= zones[id].points;
+		var opts = {
+			width : 730, // 信息窗口宽度
+			height: 650, // 信息窗口高度
+			}
+		//console.log(zone.id);
+		//console.log(odmcount[zone.id].count[1]);
+		//console.log(poicount2[zone.id-1]);
+		var zoneContent =
+			"<div class='allpage'>"+
+			"<div class = 'title'><h4>"+zone.name+"</h4></div>"+
+			"<div>"+
+			"<h4>图片</h4>" +
+			"<div class='photopicture'>" +
+			"<img class = 'photo' src='images/"+zone.id+"/1.jpg' onerror=\"this.src='images/1.JPG'\" alt = '未能正确加载'/>"+
+			"<img class = 'photo' src='images/"+zone.id+"/2.jpg' onerror=\"this.src='images/2.JPG'\" alt = '未能正确加载'/>"+
+			"<img class = 'photo' src='images/"+zone.id+"/3.jpg' onerror=\"this.src='images/3.JPG'\" alt = '未能正确加载'/>"+
+			"<img class = 'photo' src='images/"+zone.id+"/4.jpg' onerror=\"this.src='images/4.JPG'\" alt = '未能正确加载'/>"+
+			"</div>"+
+			"<h4>出行</h4>" +
+			"<div id='linePicture' class='linepicture'></div>"+
+			"<h4>兴趣点</h4>" +
+			"<div class ='pie'>"+
+			"<div id='pieTable' class='pieTable'>"+
+			"<table class='table table-bordered table-condensed table-striped'>"+
+			"	<tr>"+
+			"		<td>分类</td>"+
+			"		<td>数量</td>"+
+			"		<td>全市占比</td>"+
+			"	</tr>"+
+			"	<tr>"+
+			"		<td>学校</td>"+
+			"		<td>"+poicount[zone.id-1].school+"</td>"+
+			"		<td>"+poicount2[zone.id-1].school+"</td>"+
+			"	</tr>"+
+			"	<tr>"+
+			"		<td>医院</td>"+
+			"		<td>"+poicount[zone.id-1].hospital+"</td>"+
+			"		<td>"+poicount2[zone.id-1].hospital+"</td>"+
+			"	</tr>"+
+			"	<tr>"+
+			"		<td>消费场所</td>"+
+			"		<td>"+poicount[zone.id-1].consume+"</td>"+
+			"		<td>"+poicount2[zone.id-1].consume+"</td>"+
+			"	</tr>"+
+			"	<tr>"+
+			"		<td>机关单位</td>"+
+			"		<td>"+poicount[zone.id-1].publicplace+"</td>"+
+			"		<td>"+poicount2[zone.id-1].publicplace+"</td>"+
+			"	</tr>"+
+			"	<tr>"+
+			"		<td>其他</td>"+
+			"		<td>"+poicount[zone.id-1].others+"</td>"+
+			"		<td>"+poicount2[zone.id-1].others+"</td>"+
+			"	</tr>"+
+			"</table>"+
+			"</div>"+
+			"<div id='piePicture' class='piepicture'></div>"+
+			"</div>"+
+			"</div>"+
+			"</div>";
+		var cpoint=new BMap.Point(zones[id].centerX, zones[id].centerY);
+		var polygon = new BMap.Polygon(points.map(function(o){return new BMap.Point(o[0],o[1])}), {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5});
+		map.addOverlay(polygon);  
+		map.centerAndZoom(cpoint, 15);  // 初始化地图,设置中心点坐标和地图级别
+		
+		var infoWindow = new BMap.InfoWindow(zoneContent,{
+				width : 750,     // 信息窗口宽度
+				height: 650,     // 信息窗口高度
+			});  // 创建信息窗口对象 
+			
+		map.openInfoWindow(infoWindow,cpoint);
+		
+
+		// 路径配置
+		require.config({
+			paths: {
+				echarts: 'assets/js'
+			}
+		});
+		
+		// 使用
+		require(
+			[
+				'echarts',
+				'echarts/chart/line', // 按需加载
+				'echarts/chart/pie' 
+			],
+			function (ec) {
+				// 基于准备好的dom，初始化echarts图表
+				var myChart1 = ec.init(document.getElementById('linePicture')); 
+				var option1 = {
+					title : {
+						text: '出行图',
+					},
+					tooltip : {
+						trigger: 'axis'
+					},
+					legend: {
+						data:['出发量','到达量','吞吐量']
+					},
+					toolbox: {
+						show : false,
+						},
+					calculable : true,
+					xAxis : [
+						{
+							type : 'category',
+							boundaryGap : false,
+							data : ['0:30','1:00','1:30','2:00','2:30','3:00','3:30','4:00','4:30','5:00','5:30','6:00','6:30','7:00','7:30','8:00','8:30','9:00','9:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30','23:00','23:30','24:00']
+						}
+					],
+					yAxis : [
+						{
+							type : 'value',
+							axisLabel : {
+								formatter: '{value} 人'
+							}
+						}
+					],
+					series : [
+						{
+							name:'出发量',
+							type:'line',
+							data :odmcount[zone.id-1].count[0],
+							
+						},
+						{
+							name:'到达量',
+							type:'line',
+							data:odmcount[zone.id-1].count[1],
+							
+						},
+						{
+							name:'吞吐量',
+							type:'line',
+							data:odmcount[zone.id-1].count[2],
+							
+						}
+					]
+				};
+				// 为echarts对象加载数据 
+				myChart1.setOption(option1); 
+				
+				
+				
+				var myChart2 = ec.init(document.getElementById('piePicture')); 
+				var option2 = {
+					title : {
+						text: '兴趣点分布',
+						x:'center'
+					},
+					tooltip : {
+						trigger: 'item',
+						formatter: "{a} <br/>{b} : {c} ({d}%)"
+					},
+					legend: {
+						orient : 'vertical',
+						x : 'left',
+						data:['学校','医院','消费场所','机关单位','其他']
+					},
+					toolbox: {
+						show : false,
+					},
+					calculable : true,
+					series : [
+						{
+							name:'兴趣点分类',
+							type:'pie',
+							radius : '55%',
+							center: ['50%', '60%'],
+							data:[
+								{value:poicount2[zone.id-1].school, name:'学校'},
+								{value:poicount2[zone.id-1].hospital, name:'医院'},
+								{value:poicount2[zone.id-1].consume, name:'消费场所'},
+								{value:poicount2[zone.id-1].publicplace, name:'机关单位'},
+								{value:poicount2[zone.id-1].others, name:'其他'}
+							]
+						}
+					]
+				};
+				// 为echarts对象加载数据 
+				myChart2.setOption(option2); 
+				
+			}
+		);
+	}
+	function czone(a,b){
+		return a.name.localeCompare(b.name);
+	}
+</script>
+

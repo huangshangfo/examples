@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>1911交通小区</title>
+
+	<link rel="stylesheet" href="css/leaflet.css"/>
+	<script type="text/javascript" src="js/d3.v3.min.js"></script>
+	<script type="text/javascript" src="js/queue.v1.min.js"></script>
+	<script type="text/javascript" src="js/topojson.v0.min.js"></script>
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+	<script src="json/geojson_1911_addPoint.json"></script>
+	
+	
+    <script src="js/leaflet.js"></script>
+			
+    <script src="lib/baiduMapAPI-150-min.js"></script>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZQj4FGK1Guxf972nf7dmCjkS"></script>
+	<script type="text/javascript" src="http://developer.baidu.com/map/jsdemo/demo/convertor.js"></script>
+    <script src="layer/tile/leaflet-baidu.js"></script>
+	<style type="text/css">
+
+
+	#mapp {
+		/*background-color: rgb(0,200,0);*/
+		float:left;
+		height:800px;
+		width:100%;	
+	}
+
+	#mappp {
+		float:left;
+		height:100%;
+		width:100%;
+		padding:5px;
+	}
+
+	svg{
+		position:relative;
+	}
+
+
+	path {
+		stroke: #fff;
+		stroke-width: .5px;
+	}
+	 
+	path:hover {
+		fill-opacity: 0.8;
+	}
+
+	h2 {
+		font-size: 20px !important;
+		font-weight: bold !important;
+	}
+
+	</style>
+</head>
+
+
+<body>
+	<div id="mapp"><div id="mappp">
+
+</body>		
+
+	
+    <script type='text/javascript'>
+			
+			
+			document.getElementById("mapp").style.height = document.body.clientHeight+"px";
+			
+            var map = new L.map(
+                'mappp',
+                {
+                    'crs': L.CRS.BEPSG3857,
+                    // Coordinate of Tian'an Men of Baidu Coordinate
+                    'center': [39.915, 116.404],
+                    'zoom': 12,
+                    // zoomAnimation: false
+                }
+            );
+			
+            L.control.scale().addTo(map);
+            var baiduLayer = new L.TileLayer.BaiduLayer();
+            map.addLayer(baiduLayer);
+		
+			var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+				g = svg.append("g").attr("class", "leaflet-zoom-hide");
+				
+			var transform = d3.geo.transform({point: projectPoint}),
+			   path = d3.geo.path().projection(transform); 
+			
+			
+			//L.marker([39.915, 116.404]).addTo(map); //leaflet的marker
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			d3_features = g.selectAll("path")
+				  .data(tazData.features)
+				.enter().append("path")
+				
+				/*
+				.attr("fill",function(d){
+					var id = d.properties.id;
+					var total = eval(flowToday[id-1].join('+'));
+					var flag = total/(zones[id-1].area/1000000);
+					if(flag > 3000){
+						return "#bd0000";
+					}
+					else{
+						return "#434343";
+					}
+				})
+				.attr("fill-opacity", function(d){
+					var id = d.properties.id;
+					var total = eval(flowToday[id-1].join('+'));
+					var flag = total/(zones[id-1].area/1000000);
+					if(flag > 30000){
+					    return 1;
+					}
+					else if(flag > 10000){
+					    return 0.75;
+					}
+					
+					else{
+						return 0.5;
+					}
+				})
+				*/
+				
+				.attr("fill",function(d){
+					return "#434343";
+				})
+				.attr("fill-opacity", function(d){
+					return 0.5;
+				})
+				
+				.on("mouseover",function(d){
+				
+					var position = path.centroid(d);
+					var tmp=   g.append("text")
+					  .attr("id", "tooltip")
+					  .attr("x", position[0]-10)
+					  .attr("y", position[1]-10)
+					  .attr("text-anchor", "middle")
+					  .attr("text-anchor", "middle")
+					  .attr("font-family", "sans-serif")
+					  .attr("font-size", "18px")
+					  .attr("font-weight", "bold")
+					  .attr("fill", "black")
+					  .text(d.properties.id);
+					  /*
+					  .text(function(){
+						if(d.properties.name == "null"){
+							return "";
+						}
+						else{
+							return d.properties.name;
+						}
+					  });
+					  */
+					  
+				})
+
+				.on("mouseout",function(){
+					g.selectAll("text")
+						.remove();
+					
+				})
+				//.on("click", clicked(d));
+				.on("click", function(d){
+					//alert(d.properties.id);
+					//document.getElementById('chart1').innerHTML = "";
+					showPOIpercent(d.properties.id);
+				});
+			map.on("viewreset", reset); //该句为控制地图缩放点不串位置的关键
+			reset();
+			
+			
+			//测试画点失败
+			
+			
+			
+			function reset() {
+				
+				//console.log(points);
+				var pp = map.latLngToLayerPoint(new L.LatLng(39.915049, 116.403959));
+				
+				var bounds = path.bounds(tazData);
+				var	topLeft = bounds[0],
+					bottomRight = bounds[1];
+
+				//console.dir(svg);
+				
+				svg .attr("width", bottomRight[0] - topLeft[0])
+					.attr("height", bottomRight[1] - topLeft[1])
+					.style("left", topLeft[0] + "px")
+					.style("top", topLeft[1] + "px");
+
+				g   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+				d3_features.attr("d", path);
+				
+				var drawPoints = g.selectAll("circle")
+				.data(points)
+				.enter()
+				.append("circle")  
+				.attr("cx",function(d){
+					var ppp = map.latLngToLayerPoint(new L.LatLng(d[1], d[0]));
+					return ppp.x;
+				})  
+				.attr("cy",function(d){
+					var ppp = map.latLngToLayerPoint(new L.LatLng(d[1], d[0]));
+					return ppp.y;
+				})  
+				.attr("r",5);
+			
+				
+				
+				//※要把点的函数放到这里面※
+				/*
+				g.selectAll("circle")
+				.data(tazData.features)
+				.enter()
+				.append("circle")
+				.attr("class","point")  
+				.attr("cx",function(d){
+					var pp = map.latLngToLayerPoint(new L.LatLng(d.properties.centerY, d.properties.centerX));
+					return pp.x;
+				})  
+				.attr("cy",function(d){
+					var pp = map.latLngToLayerPoint(new L.LatLng(d.properties.centerY, d.properties.centerX));
+					return pp.y;
+				})  
+				.attr("r",2);
+				*/
+				
+				
+				
+				
+				
+				
+			}
+			
+			
+			function projectPoint(x, y) {
+
+				var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+				this.stream.point(point.x, point.y);
+			}
+
+			
+			//点击效果
+			function clicked(d) {
+				console.dir(d);	
+				document.getElementById('chart1').innerHTML = "";
+				showPOIpercent(d);
+				
+				
+			}		
+						
+			
+
+        </script>

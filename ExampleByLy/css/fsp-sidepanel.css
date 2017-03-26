@@ -1,0 +1,25 @@
+body {
+    overflow-x: hidden;
+    background-color: white;
+}
+
+.fsp-wrapper {
+    position: relative;
+    background-color: inherit;
+}
+
+.fsp-sidepanel {
+    display: block;
+    position: absolute;
+    min-height: 100%;
+}
+
+.fsp-sidepanel-right {
+    right: 0;
+}
+
+.fsp-content {
+    transform: translate3d(0, 0, 0);
+    transition: transform .3s;
+    background-color: inherit;
+}

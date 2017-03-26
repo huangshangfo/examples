@@ -1,0 +1,582 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>手机信令热力图</title>
+	<script src="assets/js/jquery-1.12.1.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script> 
+	<script type="text/javascript" src = "assets/data/phone/phone_heat_sel.json"></script>
+    <script src="assets/js/echarts.js"></script>
+    <script type="text/javascript" src = "assets/js/main.js"></script>
+	<style type="text/css">
+	body{
+		background-color: #333;
+	}
+	
+	.mainContent {
+		/*background-color: rgb(200,0,0);*/
+		width:100%;
+		height:900px;
+	}
+
+	#left {
+		/*background-color: rgb(0,200,0);*/
+		float:left;
+		height:100%;
+		width:70%;
+		padding:10px;
+		margin-left:5px;
+		margin-right:10px;
+	}
+	
+	#map {
+		/*background-color: rgb(0,200,0);*/
+		float:left;
+		height:80%;
+		width:100%;
+		padding:5px;
+		margin:5px;
+	}
+	
+	#fig3 {
+		/*background-color: rgb(0,200,70);*/
+		float:left;
+		height:20%;
+		width:100%;
+		padding:5px;
+		margin:5px;
+	}
+	
+	#right {
+		/*background-color: rgb(0,0,200);*/
+		float:right;
+		height:100%;
+		width:25%;
+		padding:5px;
+	}
+
+	#sel {
+		/*background-color: rgb(0,200,200);*/
+		height:10%;
+		width:100%;
+		padding:15px;
+		padding-top:30px;
+		
+		margin-bottom:5px;
+	}
+
+	#fig1 {
+		/*background-color: rgb(200,0,200);*/
+		height:42%;
+		width:100%;
+		padding:10px;
+		margin-bottom:5px;
+	}
+
+	#fig2 {
+		/*background-color: rgb(0,200,200);*/
+		height:42%;
+		width:100%;
+		padding:10px;
+	}
+
+	svg{
+		position:relative;
+	}
+	
+	#sel_font {
+		float:left;
+		color:white;
+		font-size:20px;
+		font-weight:bold;
+	}
+	
+	#sel_select {
+		float:left;
+		color:black;
+		font-size:20px;
+		
+	}
+
+	path {
+		stroke: #fff;
+		stroke-width: .5px;
+	}
+	 
+	path:hover {
+		fill-opacity: 0.8;
+	}
+
+	h1 {color:white;}
+	h2 {color:white;}
+
+	</style> 
+
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div class="mainContent">
+    <div id="left">
+    	<div id="map"></div>
+    	<div id="fig3"></div>
+    </div>
+    <div id= "right">
+      <div id="sel">
+			<p id="sel_font">请选择日期：  </p>
+			<p>
+			<select id="sel_select" onchange = 'changeDateData(this.value)'>
+				
+			</select>
+			</p>
+		</div>
+		<div id="fig1" ></div>
+		<div id="fig2"></div>
+    </div>
+  </div>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+    
+	function changeDateData(value){
+			//alert(value);
+		}
+		
+	var dataroot = "assets/data/phone/phone_heat_data_20130225.json";
+		var geodata = null;
+		var heatdata = null;
+		var count_legend_data = null;
+		var count_data = null;
+		var update_legend_data = null;
+		var update_data = null;
+		var line_data = null;
+		var line_data2 = null;
+		
+
+	
+	
+		
+
+        var select = document.getElementById('sel_select');
+		for(var i = 0; i < opt_date.length; i++){
+		    var option = document.createElement("option");
+			option.innerText = opt_date[i][0];
+			option.value = opt_date[i][1];
+			select.appendChild(option);
+		}
+		
+        require.config({
+            paths: {
+                echarts: 'assets/js/'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/heatmap',
+                'echarts/chart/map',
+                'echarts/chart/bar',
+				'echarts/chart/pie',
+				'echarts/chart/line',
+            ],
+
+        function (echarts, BMapExtension) {
+    // 基于准备好的dom，初始化echarts图表
+
+	 var myChart1 = echarts.init(document.getElementById('fig1')); //饼状图1
+	 var myChart2 = echarts.init(document.getElementById('fig2')); //饼状图2
+	 var myChart3 = echarts.init(document.getElementById('fig3'));//柱状图
+    
+ 
+	//heatdata.forEach(function(o){
+		//o[2] = o[2]/2;
+		//console.log(o[2]);
+	//});
+	
+	//alert(heatdata[0][2]);
+	
+	
+
+        // 初始化地图
+        var mapcon = document.getElementById("map");
+        var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+            enableMapClick: false,
+            minZoom:10,maxZoom:15
+        });
+        var map = BMapExt.getMap();
+        var container = BMapExt.getEchartsContainer();
+
+        var startPoint = {x:116.404323,y:39.907566};
+        var point = new BMap.Point(startPoint.x, startPoint.y);
+        map.centerAndZoom(point, 12);
+        map.enableScrollWheelZoom(true);
+        // 地图自定义样式
+        map.setMapStyle({
+            styleJson: [
+                  {
+                       "featureType": "water",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#044161"
+                       }
+                  },
+                  {
+                       "featureType": "land",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#064f85"
+                       }
+                  },
+                  {
+                       "featureType": "railway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#005b96",
+                            "lightness": 1
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#00508b"
+                       }
+                  },
+                  {
+                       "featureType": "poi",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "green",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#056197",
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "subway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "manmade",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "local",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#029fd4"
+                       }
+                  },
+                  {
+                       "featureType": "building",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#1a5787"
+                       }
+                  },
+                  {
+                       "featureType": "label",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  }
+            ]
+        });
+
+
+        option = {
+    title : {
+        text: '手机信令数据热力图',
+        x:'center',
+        textStyle: {
+            color: 'white',
+            "fontSize": 50,
+            "fontFamily": "黑体"
+        }
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: '{b}'
+    },
+    toolbox: {
+        show : true,
+        orient : 'vertical',
+        x: 'right',
+        y: 'center',
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    series : [
+        {
+            name: '北京',
+            type: 'heatmap',
+            hoverable: false,
+            data:heatdata,
+            geo:geodata,
+			blurSize:50,
+            minAlpha: 0,
+            valueScale: 0.7,
+            opacity: 0.6,
+        }
+    ]
+    
+};
+    var option1 = {
+    	title : {
+        text: '用户记录数分布',
+        x:'right',
+		textStyle:{color:'#fff'}
+    },
+    tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b}: {c} ({d}%)",
+		textStyle:{color:'#fff'}
+    },
+    legend: {
+        orient: 'vertical',
+        x: 'left',
+        data:count_legend_data,
+		textStyle:{color:'#fff'}
+    },
+    series: [
+        {
+            name:'访问来源',
+            type:'pie',
+            radius: ['50%', '70%'],
+            avoidLabelOverlap: true,
+            label: {
+                normal: {
+                    show: false,
+                    position: 'inside'
+                },
+                emphasis: {
+                    show: true,
+                    textStyle: {
+                        fontSize: '30',
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            labelLine: {
+                normal: {
+                    show: false
+                }
+            },
+            data:count_data
+        }
+    ]
+};
+   	var option2 = {
+    title : {
+        text: '更新周期分布',
+        x:'left',
+		textStyle:{color:'#fff'}
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+      legend: {
+        orient: 'horizon',
+        x: 'right',
+        data:update_legend_data,
+		textStyle:{color:'#fff'}
+		},
+    series : [
+        {
+            name: '访问来源',
+            type: 'pie',
+            label: {
+                normal: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    show: true,
+                    textStyle: {
+                        fontSize: '30',
+                        fontWeight: 'bold'
+                    }
+                },
+                labelLine: {
+                normal: {
+                    show: false
+                }
+            },
+            },
+            radius : '55%',
+            center: ['50%', '60%'],
+            data:update_data,
+            itemStyle: {
+                emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        }
+    ]
+};
+   var option3 = {
+   title : {
+        text: '每小时信令数据量',
+		textStyle:{color:'#fff'}
+    },
+    tooltip: {
+        trigger: 'axis'
+    },
+    toolbox: {
+        feature: {
+            dataView: {show: true, readOnly: false},
+            magicType: {show: true, type: ['line', 'bar']},
+            restore: {show: true},
+            saveAsImage: {show: true}
+        }
+    },
+    legend: {
+        data:['信令数据量','信令数据量2'],
+		textStyle:{color:'#fff'}
+    },
+    xAxis: [
+        {
+          	type : 'category',
+						splitLine:{ 
+							show:false 
+						},
+						boundaryGap : [0, 0.01],
+						data : ['1:00','2:00','3:00','4:00','5:00','6:00','7:00','8:00','9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00','24:00'],
+						axisLabel:{textStyle:{color:'#fff'}}
+        }
+    ],
+    yAxis: [
+        {
+            type: 'value',
+            name: '百次',
+		splitLine:{ 
+							show:true 
+						},
+						axisLabel:{textStyle:{color:'#fff'}}
+					
+        }
+    ],
+    series: [
+        {
+            name:'信令数据量',
+            type:'bar',
+            data:line_data
+        },
+		{
+            name:'信令数据量2',
+            type:'line',
+            data:line_data2
+        }
+    ]
+};
+
+
+   var myChart = BMapExt.initECharts(container);
+        /*BMapExt.setOption(option);
+         myChart1.setOption(option1);
+         myChart2.setOption(option2); 
+ 		myChart3.setOption(option3); */
+
+    		
+			//alert(dataroot);
+		window.onload = function(){
+			$.getJSON(dataroot, function(data){ 
+			option.series[0].geo = data.geodata;
+			
+			option.series[0].data = data.heatdata;
+            option1.legend.data = data.count_legend_data;
+			option1.series[0].data = data.count_data;
+			option2.legend.data = data.update_legend_data;
+			option2.series[0].data = data.update_data;
+			option3.series[0].data = data.line_data;
+			option3.series[1].data = data.line_data2;
+			
+			BMapExt.setOption(option);
+            myChart1.setOption(option1);
+            myChart2.setOption(option2); 
+ 		    myChart3.setOption(option3);
+		    });
+		}	
+		
+    });
+
+    </script>
+</html>

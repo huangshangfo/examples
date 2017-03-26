@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>北京城市人口“职住行”分析</title>
+<script src = "http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<link rel="stylesheet" href="css/jquery.fullPage.css">
+<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+<script src = "http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+<style>
+html,body{
+	height:100%;
+}
+body{
+	
+	padding-top:50px;
+}
+.page{background:#333333;
+height:100%;
+} 
+h3{position:absolute; top:100px; width:100%; text-align:middle;}
+iframe{overflow:hidden; width:100%; height :100%; position:relative;}
+
+.dropdown-submenu {
+	position: relative;
+}
+.dropdown-submenu > .dropdown-menu {
+	top: 0;
+	left: 100%;
+	margin-top: -6px;
+	margin-left: -1px;
+	-webkit-border-radius: 0 6px 6px 6px;
+	-moz-border-radius: 0 6px 6px;
+	border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover > .dropdown-menu {
+	display: block;
+}
+.dropdown-submenu > a:after {
+	display: block;
+	content: " ";
+	float: right;
+	width: 0;
+	height: 0;
+	border-color: transparent;
+	border-style: solid;
+	border-width: 5px 0 5px 5px;
+	border-left-color: #ccc;
+	margin-top: 5px;
+	margin-right: -10px;
+}
+.dropdown-submenu:hover > a:after {
+	border-left-color: #fff;
+}
+.dropdown-submenu.pull-left {
+	float: none;
+}
+.dropdown-submenu.pull-left > .dropdown-menu {
+	left: -100%;
+	margin-left: 10px;
+	-webkit-border-radius: 6px 0 6px 6px;
+	-moz-border-radius: 6px 0 6px 6px;
+	border-radius: 6px 0 6px 6px;
+}
+
+
+</style>
+<script src="js/jquery-1.8.3.min.js"></script>
+<script src="js/jquery.fullPage.min.js"></script>
+</head>
+
+<body>
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<a class="navbar-brand" href="#">北京城市人口“职住行”分析</a>
+		<div id="navbar" class="navbar-collapse collapse">
+			<ul class="nav navbar-nav navbar-right">
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">北京职住行分析
+						<b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu ">
+						<li><a href="lheat.html" target="iframe_content">居住地分布</a></li>
+						<li><a href="wheat.html" target="iframe_content">工作地分布</a></li>
+						<li class="dropdown-submenu disabled">
+							<a tabindex="-1" href="#">出行流向分析</a>
+							<ul class="dropdown-menu">
+								<li><a href="odmaxm.html" target="iframe_content">工作日</a></li>
+								<li><a href="odmaxs.html" target="iframe_content">周末</a></li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">通州地区职住行分析
+						<b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a href="lheat_tz.html" target="iframe_content">居住地分布</a></li>
+						<li><a href="wheat_tz.html" target="iframe_content">工作地分布</a></li>
+						<li class="dropdown-submenu disabled">
+							<a tabindex="-1" href="#">出行流向分析</a>
+							<ul class="dropdown-menu">
+								<li><a href="odmaxm_tz.html" target="iframe_content">工作日</a></li>
+								<li><a href="odmaxs_tz.html" target="iframe_content">周末</a></li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">政府单位周边客流
+						<b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a href="odbjszf.html" target="iframe_content">北京市市委市政府周边</a></li>
+						<li><a href="odzhgc.html" target="iframe_content">中环广场写字楼周边</a></li>
+						<li><a href="odtzszf.html" target="iframe_content">通州区区政府周边</a></li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">机构设施分布分析
+						<b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a href="poigrid.html#1" target="iframe_content">学校</a></li>
+						<li><a href="poigrid.html#2" target="iframe_content">医院</a></li>
+						<li><a href="poigrid.html#3" target="iframe_content">政府事业单位</a></li>
+					</ul>
+				</li>
+				<li><a href="topicpdf.pdf" target="iframe_content">舆情分析</a></li>
+				<li><a> </a></li>
+			</ul>
+        </div>
+	</nav>
+<div class="page">
+	<iframe src="lheat.html" id="iframe_content"  name="iframe_content" frameborder="0"></iframe>
+</div>
+</body>
+</html>

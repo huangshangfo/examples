@@ -1,0 +1,360 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet and D3 Map</title>
+    <meta charset="utf-8" />
+    <link 
+        rel="stylesheet" 
+        href="css/leaflet.css"
+    />
+	  <link  href="css/index2.css" media="all" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="css/navi.css">
+    <link href="css/index_text.css" media="all" rel="stylesheet" />
+    <link href="css/video-js.css" rel="stylesheet" type="text/css">
+   
+
+ <script type="text/javascript" src="js/jquery.min.js"></script>
+
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/jquery.bootstrap-autohidingnavbar.min.js"></script>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta content="authenticity_token" name="csrf-param" />
+<meta content="LM7sQVv0rBWWUIXl+PUavWCQnzMAC6IIbmZwcZulokE=" name="csrf-token" />
+
+
+<script type="text/javascript" src="js/d3.v3.min.js"></script>
+<script type="text/javascript" src="js/queue.v1.min.js"></script>
+<script type="text/javascript" src="js/topojson.v0.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="assets/echarts3.js"></script>
+
+<script src="json/Afterchangetranszone.json"></script>
+<script src="json/tazPOI2.json"></script>
+
+<!--这个是侧边栏的插件！！！
+	<link rel="stylesheet" type="text/css" href="css/normalize.css" />
+	<link rel="stylesheet" type="text/css" href="css/default.css">-->
+	<script src="js/fsp-sidepanel.js"></script>
+    <link rel="stylesheet" href="css/fsp-sidepanel.css"/>
+
+	<style type="text/css">
+html,body{
+-moz-user-select: none;
+-khtml-user-select: none;
+user-select: none;
+height:100%;
+width:100%;
+}
+		
+div#header {text-align:center;}
+
+
+div#mainContent {height:100% !important;width:100% !important ;overflow:hidden;margin-left:1%;margin-right:1%;margin-top:1%;margin-bottom:1%;float:left;}
+div#map1{width:100%;height:100%;}
+div#sidebar{
+        position:absolute;
+        top:0px;
+        right:0px;
+        width:600px;
+		height:100% !important;
+        z-index:200;
+		background-color:rgba(0,0,0,0.5); 
+        
+        color:#fff;
+        padding:0px;
+        overflow-y:hidden;
+		overflow-x:hidden;
+		margin-top:1%;margin-bottom:1%;
+        }
+<!--right为table，左边一行btn,右边三行-->		
+table#right　{height:100%;width:100%;text-align:center;float:right; background-color:blue;}
+div#btn {height:100%;width:50px;text-align:center;float:left;background-color:none;}
+div#yearData {width:400px;text-align:center;}
+div#footer-text {text-align:center; padding-right: 50px}
+div#barGraph {width:500px;height:600px;text-align:right;}
+
+
+div#tooltip {background-color:#FFFFFF;text-align:center;}
+
+svg{
+	position:relative;
+}
+
+
+path {
+    stroke: #fff;
+    stroke-width: .5px;
+}
+ 
+path:hover {
+    fill-opacity: 0.8;
+}
+	
+
+
+
+
+
+		
+
+
+.tabBtn{position:absolute;cursor:pointer;padding:5px 0;line-height:18px;font-size:12px;text-align:center;color:#fff;background:rgba(254,133,85,.6);width:20px;top:0;left:-20px}
+
+h1 {color:white;}
+h2 {color:white;}
+
+
+.sidebar{
+        
+}
+
+
+	</style>
+</head>
+<body>
+
+	<div id="mainContent" >
+
+		 <div id="map1" ></div>
+	</div>
+	
+	<div id="sidebar" class="sidebar">
+					<!-- 右侧边栏的内容 -->
+					<table id="right" cellspacing=”0″ cellpadding=”0″ >
+					   <caption></caption>
+						<tr ><td rowspan="3">
+								<div id="btn" > 
+									<button id="button1" style=" color:black " onclick="moveGraph()">图<br>表<br>展<br>示 <br></button>
+								</div>
+						
+							</td> 
+						</tr>
+						
+						<tr>
+							<td>
+								<div id="footer-text">
+									<h1 id="tazName">点击地图中交通小区，这里展示客流</h1>
+								</div>
+							</td>
+						</tr>
+						
+						<tr >
+							<td>
+							
+								<div id="barGraph" >
+								</div>
+							</td>
+						</tr>
+					</table>
+					
+
+				</div>
+			
+	
+	<script src="js/d3.v3.min.js"></script>
+	<script src="json/Afterchangetranszone.json"></script>
+    <script
+        src="js/leaflet.js">
+    </script>
+			
+    <!-- <script src="http://api.map.baidu.com/api?v=1.5&ak=wEdGBRYrr5t1tF9X9cGbSmkB"></script> -->
+    <script src="lib/baiduMapAPI-150-min.js"></script>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZQj4FGK1Guxf972nf7dmCjkS"></script>
+	<script type="text/javascript" src="http://developer.baidu.com/map/jsdemo/demo/convertor.js"></script>
+    <script src="layer/tile/leaflet-baidu.js"></script>
+    <script type='text/javascript'>
+		
+			document.body.style.backgroundColor="black";
+			
+			//console.log(tazData.features[0].properties.color);
+			
+			
+			console.dir(document.getElementById("mainContent").style.width);
+			console.dir(document.getElementById("mainContent").style.height);
+			console.dir(document.body.clientWidth);
+			console.dir(document.body.clientHeight);
+			
+			console.dir(document.getElementById("mainContent").style.width);
+			console.dir(document.getElementById("mainContent").style.height);
+			//为按键展示图标写一下监听事件
+			var graphState = 1;//state=1为展开，0为收缩，默认为展开
+			var speed = 8;
+			function moveGraph(){
+				console.dir("click!!");
+				var graph = document.getElementById("sidebar");
+				console.dir(graph);
+				if(graphState==0){
+					graph.style.width= "600px";
+					graphState = 1;
+				}
+				else{
+					graph.style.width= "50px";
+					graphState = 0;
+				}
+			
+			}
+			
+		
+            var map = new L.map(
+                'map1',
+                {
+                    'crs': L.CRS.BEPSG3857,
+                    // Coordinate of Tian'an Men of Baidu Coordinate
+                    'center': [39.915, 116.404],
+                    'zoom': 12,
+                    // zoomAnimation: false
+                }
+            );
+			
+            L.control.scale().addTo(map);
+            var baiduLayer = new L.TileLayer.BaiduLayer();
+            map.addLayer(baiduLayer);
+			
+		
+			var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+				g = svg.append("g").attr("class", "leaflet-zoom-hide");
+				
+			var transform = d3.geo.transform({point: projectPoint}),
+			   path = d3.geo.path().projection(transform);
+
+			
+			console.dir(tazData);
+			
+			   
+			d3_features = g.selectAll("path")
+				  .data(tazData.features)
+				.enter().append("path")
+				.attr("fill",function(d){
+						//console.dir("ooo???");
+						//console.dir(d.properties.theme);
+						return d.properties.color;
+					})
+				.attr("fill-opacity",0.5)
+				.on("mouseover",function(d){
+				
+					var position = path.centroid(d);
+					var tmp=   g.append("text")
+					  .attr("id", "tooltip")
+					  .attr("x", position[0]-10)
+					  .attr("y", position[1]-10)
+					  .attr("text-anchor", "middle")
+					  .attr("font-family", "sans-serif")
+					  .attr("font-size", "18px")
+					  .attr("font-weight", "bold")
+					  .attr("fill", "black")
+					  .text(d.properties.name);
+				})
+				.on("mouseout",function(){
+					g.selectAll("text")
+						.remove();
+					
+				})
+				.on("click", clicked);
+				
+			map.on("viewreset", reset);
+			reset();
+			
+			
+			function reset() {
+				var bounds = path.bounds(tazData);
+				var	topLeft = bounds[0],
+					bottomRight = bounds[1];
+
+				console.dir(svg);
+				
+				svg .attr("width", bottomRight[0] - topLeft[0])
+					.attr("height", bottomRight[1] - topLeft[1])
+					.style("left", topLeft[0] + "px")
+					.style("top", topLeft[1] + "px");
+
+				g   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+				console.dir(svg);
+				d3_features.attr("d", path);
+			}
+			
+			
+			function projectPoint(x, y) {
+
+				var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+				this.stream.point(point.x, point.y);
+			}
+
+			
+			//点击效果
+			function clicked(d) {
+					
+				document.getElementById('barGraph').innerHTML = "";
+				showPOIpercent(d);
+				
+				
+			}		
+						
+						
+			//点击一个交通小区以后显示一个柱状图
+			function showPOIpercent(d) {
+				// 基于准备好的dom，初始化echarts实例
+		        var myChart = echarts.init(document.getElementById('barGraph'));
+
+		        // 指定图表的配置项和数据
+		        var option = {
+		            title: {
+		                text: 'ECharts 入门示例',
+		                textStyle:{
+		                	color:'white'
+		                },
+		                left:'center'
+		            },
+		            grid:{
+		            	show:false,
+		            },
+		            tooltip: {},
+		            xAxis: {
+		            	axisLabel:{
+		            		textStyle:{
+		                		color:'white'
+		                	}
+		            	},
+		            	axisLine:{
+		            		lineStyle:{
+		            			color:'white'
+		            		}
+		            	},
+		            	splitLine:{
+		            		show:false,
+		            	},
+		                data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+		            },
+		            yAxis: {
+		            	axisLabel:{
+		            		textStyle:{
+		                		color:'white'
+		                	}
+		            	},
+		            	axisLine:{
+		            		lineStyle:{
+		            			color:'white'
+		            		}
+		            	},
+		            	splitLine:{
+		            		show:false,
+		            	},
+		            },
+		            series: [{
+		                name: '销量',
+		                type: 'line',
+		                data: [5, 20, 36, 10, 10, 20]
+		            }]
+		        };
+
+		        // 使用刚指定的配置项和数据显示图表。
+		        myChart.setOption(option);
+			
+			}
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,70 @@
+﻿<!doctype html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style type="text/css">
+		body, html,#allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+	</style>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZQj4FGK1Guxf972nf7dmCjkS"></script>
+	<script src="json/geojson_461.json"></script>
+	<title>利用百度地图api绘制多边形</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+</html>
+
+<script type="text/javascript">
+	var map = new BMap.Map("allmap");
+	map.centerAndZoom(new BMap.Point(116.403765, 39.914850), 13);
+	map.enableScrollWheelZoom();
+	console.log(tazData.features.length);
+	var polygons = [];//存储所有交通小区的百度地图绘制类
+	tazData.features.forEach(function(zones){
+		var BPoints = [];
+		//console.log(zones.geometry.coordinates.length);
+		zones.geometry.coordinates.forEach(function(coordinate){
+			coordinate.forEach(function(points){
+				var point = new BMap.Point(points[0], points[1]);
+				BPoints.push(point);
+			});
+		});
+		
+		var polygon = new BMap.Polygon(BPoints, {strokeWeight:1, strokeColor:"white", fillColor:"#434343", fillOpacity:"0.5"});
+		var label;
+		
+		//对于1911交通小区的数据，mouseover和mouseout有一些问题，但是click没有问题。461交通小区的数据都没有问题。
+		
+		
+		polygon.addEventListener("mouseover", function(e){
+			//console.log(e);
+			e.target.setFillOpacity(1);
+			label = new BMap.Label(zones.properties.id, {position:e.point});
+			map.addOverlay(label);
+		});
+		polygon.addEventListener("mouseout", function(e){
+			e.target.setFillOpacity(0.5);
+			map.removeOverlay(label);
+		});
+		
+		
+		
+		polygons.push(polygon);
+	});
+	
+	polygons.forEach(function(ply){
+		map.addOverlay(ply);
+	});
+	
+	
+	
+	var point = new BMap.Point(tazData.features[0].geometry.coordinates[0][0][0],
+	tazData.features[0].geometry.coordinates[0][0][1]);
+	var marker = new BMap.Marker(point);
+	map.addOverlay(marker);
+	
+	//var ply = new BMap.Polygon(tazData.features[0].geometry.coordinates, {strokeWeight:2, strokeColor:"#ff0000"});
+	//map.addOverlay(ply);
+	//console.log(polygons);
+</script>

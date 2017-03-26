@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>北京市居住地分布分析</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <script type="text/javascript" src = "assets/data/lheat.json"></script>
+    <script type="text/javascript" src = "assets/data/lheat_g.json"></script>
+    <script type="text/javascript" src = "assets/data/zones.json"></script>
+    <script src="assets/js/echarts.js"></script>
+    <script type="text/javascript" src = "assets/js/main.js"></script>
+    <style>
+        body{
+            padding:0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main"></div>
+    <script type="text/javascript">
+        var maindiv = document.getElementById("main");
+        maindiv.style.height = document.body.clientHeight+"px";
+    </script>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+        (function(){
+
+          var lheat_gf = lheat_g.filter(function(o) {return o.count>0.005});
+
+        var heatData = lheat_gf.map(function (o){
+          return [o.lng,o.lat,o.count/130000];
+        });
+
+        var geoData = lheat_gf.map(function (o){
+          return [o.lng,o.lat];
+        });
+
+        require.config({
+            paths: {
+                echarts: 'assets/js/'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/heatmap' // 
+            ],
+
+        function (echarts, BMapExtension) {
+    // 基于准备好的dom，初始化echarts图表
+        // 初始化地图
+        var mapcon = document.getElementById("main");
+        var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+            enableMapClick: false,
+            minZoom:13,maxZoom:13
+        });
+        var map = BMapExt.getMap();
+        var container = BMapExt.getEchartsContainer();
+
+        var startPoint = {x:116.404323,y:39.907566};
+        var point = new BMap.Point(startPoint.x, startPoint.y);
+        map.centerAndZoom(point, 13);
+        map.enableScrollWheelZoom(true);
+        // 地图自定义样式
+        map.setMapStyle({
+            styleJson: [
+                  {
+                       "featureType": "water",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#044161"
+                       }
+                  },
+                  {
+                       "featureType": "land",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#064f85"
+                       }
+                  },
+                  {
+                       "featureType": "railway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#005b96",
+                            "lightness": 1
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#00508b"
+                       }
+                  },
+                  {
+                       "featureType": "poi",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "green",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#056197",
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "subway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "manmade",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "local",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#029fd4"
+                       }
+                  },
+                  {
+                       "featureType": "building",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#1a5787"
+                       }
+                  },
+                  {
+                       "featureType": "label",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  }
+            ]
+        });
+
+        option = {
+    title : {
+        text: '北京市居住地分布分析',
+        x:'center',
+        textStyle: {
+            color: 'white'
+        }
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: '{b}'
+    },
+    toolbox: {
+        show : true,
+        orient : 'vertical',
+        x: 'right',
+        y: 'center',
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    series : [
+        {
+            name: '北京',
+            type: 'heatmap',
+            hoverable: false,
+            data:heatData,
+            geo:geoData,
+            minAlpha: 0.001,
+            valueScale: 10000,
+            opacity: 0.6
+
+
+        }
+    ]
+};
+        
+        var myChart = BMapExt.initECharts(container);
+        BMapExt.setOption(option);
+                    
+    });
+})();
+    </script>
+</html>

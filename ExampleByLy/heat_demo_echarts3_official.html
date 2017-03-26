@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>echarts3热力图模板_官网</title>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script> 
+	<script src="assets/echarts3/js/echarts.min.js"></script>
+	<script src="assets/echarts3/js/bmap.min.js"></script>
+	<script type="text/javascript" src = "assets/echarts3/data/heat_demo_echarts3_official.json"></script>
+	<style>
+        body{
+            padding:0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+	<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main"></div>
+    
+</body>
+
+
+<script type="text/javascript">
+	var maindiv = document.getElementById("main");
+    maindiv.style.height = document.documentElement.clientHeight+"px";
+	var myChart = echarts.init(maindiv);
+	var points = [].concat.apply([], data.map(function (track) {
+        return track.map(function (seg) {
+            return seg.coord.concat([1]);
+        });
+    }));
+    myChart.setOption(option = {
+        animation: false,
+        bmap: {
+            center: [120.13066322374, 30.240018034923],
+            zoom: 14,
+            roam: true
+        },
+        visualMap: {
+            show: false,
+            top: 'top',
+            min: 0,
+            max: 5,
+            seriesIndex: 0,
+            calculable: true,
+            inRange: {
+                color: ['blue', 'blue', 'green', 'yellow', 'red']
+            }
+        },
+        series: [{
+            type: 'heatmap',
+            coordinateSystem: 'bmap',
+            data: points,
+            pointSize: 5,
+            blurSize: 6
+        }]
+    });
+    
+    var bmap = myChart.getModel().getComponent('bmap').getBMap();
+    bmap.addControl(new BMap.MapTypeControl());
+    
+</script>
+
+</html>

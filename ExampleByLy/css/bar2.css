@@ -1,0 +1,93 @@
+body{
+  background: #edebeb;
+}
+
+.range-holder{
+	margin: 3em auto;
+	padding: 200px 0 70px 0;
+	width: 960px;
+	background: url("pr-plan-scale.png") bottom center no-repeat;
+	
+}
+
+.dragdealer {
+  position: relative;
+  height: 20px;
+  background: #333;
+  border-radius: 8px;
+}
+.dragdealer .handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.stripe{
+	background: #ffb400 top left repeat;
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 2.5px;
+	height: 15px;
+	border-radius: 8px;
+}
+
+	#green-highlight{position: absolute; top:0; left: 67px; height: 24px; opacity: .5; background: #8dc63f; display: none;}
+	#orange-highlight{position: absolute; top:0; left: 381px; height: 24px; opacity: .5; background: #e07c00; display: none;}
+	#blue-highlight{position: absolute; top:0; left: 814px; height: 24px; opacity: .5; background: #008da8; display: none;}
+
+.square{
+  position: absolute;
+  top: 0;
+  left: 0;	  
+  margin-top: -5px;
+  margin-left: -10px;
+  cursor: pointer;
+  width: 25px;
+  height: 25px;
+  background: #ddd;
+  border-radius: 25px;
+  box-shadow: 1px 1px 8px 1px rgba(0,0,0,0.4);
+  color: #FFF;
+  font-size: 14px;
+  line-height: 30px;
+  text-align: center;
+  padding-top: 13px;
+}
+
+.menu-line{width: 50%; margin: 2px auto; height: 5px; background: #FFF; display: block;}
+
+.infobox{
+	position: absolute;
+    top: 0;
+    left: 0;
+    margin-top: -40px;
+    margin-left: -117px;
+	width: 60px;
+	height: 20px;
+	padding: 0px;
+	
+}
+
+	
+	.titlebar{
+		background:rgba(0,0,0,0.4);
+		-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+		color: #FFF;
+		font-size: 10px;
+	}
+	#plan-holder{font-weight: bold;}
+	
+	.innerbox{
+		padding: 1em;
+	}
+	
+	.info-price{color: #e07c00; font-size: 33px; line-height: 1.8em;}
+
+	
+	.annual-label{
+	  color: #505054; font-size: 14px; font-weight: bold; width: 110px; line-height: 1.8em;}
+	.annual-price{color: #939393; font-size: 17px; width: 110px;} 
+

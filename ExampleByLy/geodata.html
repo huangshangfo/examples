@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>OD展示模板</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <script type="text/javascript" src = "assets/data/od_demo.json"></script>
+	<script type="text/javascript" src = "assets/data/zones.json"></script>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+    <script src="assets/js/echarts.js"></script>
+    <style>
+        * {margin:0; padding:0;}
+        body, html {width:100%;}
+    </style>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+      <div class="main" id="main">  </div>
+	  
+    <script type="text/javascript">
+        var maindiv = document.getElementById("main");
+        maindiv.style.height = document.body.clientHeight+"px";
+    </script>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+        //用js处理已有的json，生成文本
+		var geoData = {};
+		geoData.geoData = {};
+		for (var i in zones){
+			//对于Object的key和value可以这样设定
+			geoData.geoData[zones[i].id] = [zones[i].centerX, zones[i].centerY];
+		}
+		console.log(JSON.stringify(geoData));//JSON.stringify()函数
+		maindiv.innerText = JSON.stringify(geoData);
+    </script>
+</html>

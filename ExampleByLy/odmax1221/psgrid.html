@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<html>
+<head>
+	<meta charset = "utf-8">
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+	<script type="text/javascript" src = "assets/data/psgrid.json"></script>
+	<style>
+        body{
+            padding:0;
+            margin: 0;
+        }
+		.title{
+			position:absolute;
+			top:0;
+			width:100%;
+			color:#fff;
+		}
+    </style>
+</head>
+<body>
+	<div id= "allmap"></div>
+	<div class="title">
+		<center><h3>北京市小学分布</h3></center>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	var maindiv = document.getElementById("allmap");
+    maindiv.style.height = document.body.clientHeight+"px";
+	var map = new BMap.Map("allmap");
+	var point = new BMap.Point(116.404, 39.915);
+	map.centerAndZoom(point, 10);
+	map.setMapStyle({
+        styleJson: [
+              {
+                   "featureType": "water",
+                   "elementType": "all",
+                   "stylers": {
+                        "color": "#044161"
+                   }
+              },
+              {
+                   "featureType": "land",
+                   "elementType": "all",
+                   "stylers": {
+                        "color": "#150937"
+                   }
+              },
+              {
+                   "featureType": "boundary",
+                   "elementType": "geometry",
+                   "stylers": {
+                        "color": "#064f85"
+                   }
+              },
+              {
+                   "featureType": "railway",
+                   "elementType": "all",
+                   "stylers": {
+                        "visibility": "off"
+                   }
+              },
+              {
+                   "featureType": "highway",
+                   "elementType": "geometry",
+                   "stylers": {
+                        "color": "#150937"
+                   }
+              },
+              {
+                   "featureType": "highway",
+                   "elementType": "geometry.fill",
+                   "stylers": {
+                        "color": "#005b96",
+                        "lightness": 1
+                   }
+              },
+              {
+                   "featureType": "highway",
+                   "elementType": "labels",
+                   "stylers": {
+                        "visibility": "off"
+                   }
+              },
+              {
+                   "featureType": "arterial",
+                   "elementType": "geometry",
+                   "stylers": {
+                        "color": "#150937"
+                   }
+              },
+              {
+                   "featureType": "arterial",
+                   "elementType": "geometry.fill",
+                   "stylers": {
+                        "color": "#00508b"
+                   }
+              },
+              {
+                   "featureType": "poi",
+                   "elementType": "all",
+                   "stylers": {
+                        "visibility": "on"
+                   }
+              },
+              {
+                   "featureType": "green",
+                   "elementType": "all",
+                   "stylers": {
+                        "color": "#056197",
+                        "visibility": "off"
+                   }
+              },
+              {
+                   "featureType": "subway",
+                   "elementType": "all",
+                   "stylers": {
+                        "visibility": "on"
+                   }
+              },
+              {
+                   "featureType": "manmade",
+                   "elementType": "all",
+                   "stylers": {
+                        "visibility": "off"
+                   }
+              },
+              {
+                   "featureType": "local",
+                   "elementType": "all",
+                   "stylers": {
+                        "visibility": "off"
+                   }
+              },
+              {
+                   "featureType": "arterial",
+                   "elementType": "labels",
+                   "stylers": {
+                        "visibility": "off"
+                   }
+              },
+              {
+                   "featureType": "boundary",
+                   "elementType": "geometry.fill",
+                   "stylers": {
+                        "color": "#029fd4"
+                   }
+              },
+              {
+                   "featureType": "building",
+                   "elementType": "all",
+                   "stylers": {
+                        "color": "#1a5787"
+                   }
+              },
+              {
+                   "featureType": "label",
+                   "elementType": "all",
+                   "stylers": {
+                        "visibility": "on"
+                   }
+              }
+        ]
+    });
+	var bjslng = 115.7;							//北京市最西面
+	var bjslat = 39.4;							//北京市最南面
+	var bjelng = 117.4;							//北京市最东面
+	var bjelat = 41.6;							//北京市最北面
+	psgrid.forEach(function(o,i){
+		o.forEach(function(o,j){
+			if(o==0){
+				return;
+			}
+			var level = tolevel(o);
+			map.addOverlay(new BMap.Polygon([
+				new BMap.Point(bjslng +j*0.02, bjslat +i*0.02),
+				new BMap.Point(bjslng +(j+1)*0.02, bjslat +i*0.02),
+				new BMap.Point(bjslng +(j+1)*0.02, bjslat +(i+1)*0.02),
+				new BMap.Point(bjslng +j*0.02, bjslat +(i+1)*0.02),
+			], {strokeColor:"blue", strokeWeight:0.5, strokeOpacity:0.5, fillColor:"yellow",fillOpacity:0.2*level}));
+		});
+	});
+	function tolevel (o){
+		return Math.ceil(o/3);
+	}
+</script>

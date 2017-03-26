@@ -1,0 +1,232 @@
+body{
+	font-family:"microsoft Yahei",Tahoma,Arial,Roboto,"Droid Sans","Helvetica Neue","Droid Sans Fallback","Heiti SC","Hiragino Sans GB",Simsun,sans-self;
+	font-size: 14px;
+}
+h2,h3,p{
+		font-family:"microsoft Yahei",Tahoma,Arial,Roboto,"Droid Sans","Helvetica Neue","Droid Sans Fallback","Heiti SC","Hiragino Sans GB",Simsun,sans-self;
+
+}
+  .tooltip {
+     position: absolute;
+      text-align: center;
+      width: 80px;
+     height: 30px;
+     padding-top: 4px;
+     color: white;
+    
+
+      background-color: rgba(0,0,0,0.5);
+      opacity: 0.8;
+      border: solid 1px #000;
+      border-radius: 8px;
+      pointer-events: none;
+}
+.title{
+	font-size: 40px;
+	line-height: 50px;
+	color:rgba(255,255,255,0.8); 
+	font-weight: bold;
+}
+.subtitle{
+	font-weight: lighter;
+	font-size: 30px;
+	color:rgba(255,255,255,0.8); 
+}
+.subtitle_eng{
+	color:rgba(255,255,255,0.3); 
+	font-weight: lighter;
+	margin-top: 10px;
+	font-size: 25px;
+	font-family:"Helvetica Neue","Droid Sans Fallback","microsoft Yahei",Roboto,"Droid Sans","Heiti SC","Hiragino Sans GB",Simsun,sans-self;
+
+}
+p{
+	color: #ddd;
+}
+.enter_btn{
+	margin-top: 30px;
+	text-align: center;
+	padding: 10px 10px;
+	width: 150px;
+	border-radius: 5px;
+	-moz-border-radius: 5px; 
+	-webkit-border-radius: 5px; 
+	border: 1px solid #eee;
+	cursor: pointer;
+	background: none;
+}
+.enter_btn:hover{
+	background: rgba(255,255,255,0.4);	
+}
+footer{
+	background: #4fb699;
+	margin-bottom: 0px;
+}
+.clear{
+	border-bottom: 1px solid #444;
+	-moz-border-radius: 1px solid #444;
+-webkit-border-radius:1px solid #444;
+	margin: 20px;
+	background: none;
+}
+.title_block{
+	background: #444;
+	padding-top: 80px;
+
+	text-align: center;
+	padding-bottom: 40px;
+}
+.title-graph{
+	margin-top: 30px;
+}
+.title-graph .title{
+}
+.title_eng{
+	color:rgba(255,255,255,0.4); 
+	line-height: 40px;
+	font-size: 30px;
+		font-family:"Helvetica Neue","Droid Sans Fallback","microsoft Yahei",Roboto,"Droid Sans","Heiti SC","Hiragino Sans GB",Simsun,sans-self;
+
+
+}
+.fullfill_block{
+	height: 80%;
+	text-align: center;
+	margin-top: 50px;
+}
+.header-title{
+	margin-bottom: 10px;
+	padding: 0px 15px;
+	margin-top: 90px;
+
+}
+.diagram-img-block{
+
+	font-size: 20px;
+	margin: 50px auto;
+	
+
+}
+.diagram-img:hover{
+	opacity: 0.8;
+
+}
+.diagram-img-block .text{
+	color: #ddd;
+}
+.diagram-img{
+	cursor: pointer;
+		border-radius: 100px;
+			-moz-border-radius: 100px;
+-webkit-border-radius:100px;
+	-moz-border-radius: 100px;
+-webkit-border-radius:100px;
+	width: 150px;
+	margin: 10px;
+}
+.sub-title-block{
+	background: #4fb699;
+
+}
+.sub-img-block img{
+	max-width: 100%;
+}
+.block-title{
+	font-weight: normal;
+	font-size: 24px;
+
+	color:rgba(255,255,255,0.8); 
+}
+.block-title-eng{
+		color:rgba(255,255,255,0.3); 
+	font-weight: lighter;
+	margin-top: 10px;
+	font-size: 20px;
+	font-family:"Helvetica Neue","Droid Sans Fallback","microsoft Yahei",Roboto,"Droid Sans","Heiti SC","Hiragino Sans GB",Simsun,sans-self;
+
+}
+.intro-text{
+	font-weight: lighter;
+	color: rgba(255,255,255,0.4)
+}
+.app-desc3{
+	background: #000;
+}
+.app-desc4{
+	background: #160607;
+}
+.img-corner img{
+	border-radius: 40px;
+		-moz-border-radius: 40px;
+-webkit-border-radius:40px;
+	overflow: hidden;
+	padding: 10px 20px;
+}
+.block-inner-title{
+	margin: 20px 25px;
+	font-size: 18px;
+	color: rgba(255,255,255,0.8);
+
+}
+.app-desc,.app-desc2,.app-desc3{
+	padding-bottom: 20px;
+	padding-top: 20px;
+}
+.mid-clear{
+	width: 100%;
+	border-bottom: 1px solid #444;
+	background: none;
+	margin: 30px auto;
+}
+.link-icon:hover{
+	opacity: 0.8
+}
+.weibo-icon,.link-icon{
+	opacity: 0.5;
+	cursor: pointer;
+	width: 25px;
+	float: left;
+	margin: auto 3px;
+
+}
+.name  .info{
+	font-size: 14px;
+	height: 20px;
+	color: rgba(255,255,255,0.6);
+	float: left;
+}
+.name .text{
+	float: left;
+	font-size: 18px;
+	color: rgba(255,255,255,0.8);
+}
+.name .link-icon img{
+	width: 25px;
+	float: left;
+	opacity: 0.8;
+}
+
+.name{
+	font-size: 16px;
+	color: rgba(255,255,255,0.8);
+
+}
+a{
+	color: rgba(255,255,255,0.8);
+}
+a:hover{
+	background: none;
+	text-decoration: none;
+	color: rgba(255,255,255,1)
+}
+blockquote{
+	font-size: 16px;
+	color: rgba(255,255,255,0.8)
+}
+@media screen and (min-width: 600px){
+	.phone-table1,.phone-table2{
+		padding: auto 20px;
+		margin: 0 20px;
+		max-width: 500px;
+	}
+}

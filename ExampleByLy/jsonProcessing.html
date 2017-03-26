@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>json数据处理</title>
+	<script src="json/geojson_1911.json"></script>
+	<script src="jsonProcessing/sixRingZones.json"></script>
+</head>
+<body>
+	<div id="main"></div>
+</body>
+<script type="text/javascript">
+	//console.log(sixRingZones);
+	var tazData_Six = new Object();
+	tazData_Six.type = "FeatureCollection";
+	tazData_Six.features = [];
+	console.log(tazData);
+	/*
+	var flag = new Array(1912);
+	console.log(flag.length);
+	for(var i = 0; i < 1912; i++){
+		flag[i] = 0;
+	}
+	*/
+	sixRingZones.forEach(function(s){
+		tazData.features.forEach(function(zones){
+			//console.log(zones.properties.id);
+			//console.log(s);
+			if(zones.properties.id == s){
+				tazData_Six.features.push(zones);
+			}
+		});
+	});
+	console.log(tazData_Six);
+	var main = document.getElementById("main");
+	//main.innerText = JSON.stringify(tazData_Six);
+	console.log(JSON.stringify(tazData_Six));
+</script>
+</html>

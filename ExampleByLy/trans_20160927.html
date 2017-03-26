@@ -1,0 +1,346 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>OD展示模板</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <!-- <script type="text/javascript" src = "assets/data/od_demo.json"></script>  -->
+	<script type="text/javascript" src = "json/paper/trans_20160927.json"></script>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+    <script src="assets/js/echarts.js"></script>
+    <style>
+        * {margin:0; padding:0;}
+        body, html {width:100%;}
+		.sidebar{
+        position:absolute;
+        top:0;
+        right:0;
+        width:300px;
+        max-height:87%;
+        z-index:200;
+        background-color:rgba(10,10,10,0.8);
+        color:#fff;
+        padding:20px;
+        }
+    </style>
+</head>
+<body>
+
+	<div class="sidebar" id="sidebar" style="color:white;font-family:幼圆;font-size:20px;line-height:50px">
+	</div>
+	
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+      <div class="main" id="main">  </div>
+	  
+    <script type="text/javascript">
+        var maindiv = document.getElementById("main");
+        maindiv.style.height = document.body.clientHeight+"px";
+    </script>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+        (function(){
+
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/map' // 
+            ],
+		
+		
+		
+        function (echarts, BMapExtension) {
+    // 基于准备好的dom，初始化echarts图表
+        // 初始化地图
+        var mapcon = document.getElementById("main");
+        var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+            enableMapClick: false
+        });
+        var map = BMapExt.getMap();
+        var container = BMapExt.getEchartsContainer();
+		
+		//北京坐标
+        var startPoint = {x:116.403119,y:39.914714};
+		//重庆坐标
+		//var startPoint = {x:106.549116,y:29.566725};
+        var point = new BMap.Point(startPoint.x, startPoint.y);
+        map.centerAndZoom(point, 13);
+        map.enableScrollWheelZoom(true);
+        // 地图自定义样式
+		
+        map.setMapStyle({
+            styleJson: [
+                  {
+                       "featureType": "water",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#044161"
+                       }
+                  },
+                  {
+                       "featureType": "land",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#064f85"
+                       }
+                  },
+                  {
+                       "featureType": "railway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000",
+							"weight":2
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#005b96",
+                            
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#00508b"
+                       }
+                  },
+                  {
+                       "featureType": "poi",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "green",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#056197",
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "subway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "manmade",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "local",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#029fd4"
+                       }
+                  },
+                  {
+                       "featureType": "building",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#1a5787"
+                       }
+                  },
+                  {
+                       "featureType": "label",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  }
+            ]
+        });
+		
+            options = 
+                {
+
+                    color: ['gold','aqua','lime'],
+                    title:{
+                        text: '',
+                        x:'center',
+                        textStyle : {
+                            "color": "#fff",
+                            "fontSize": 50,
+                            "fontFamily": "黑体"
+                        },
+                        subtextStyle : {
+                            "fontSize": 30,
+                            "fontFamily": "楷体"
+                        }
+                    },
+                    tooltip : {
+                        trigger: 'item',
+                        formatter:function(param){
+										if(param[5].label == 'point'){
+											document.getElementById("sidebar").innerText = param[5].transName + "\r\n" + "换乘消耗时间:" + 
+												param[5].time;
+											return param[5].transName + "<br/><br/>" + param[5].time;
+										}
+										else{
+											document.getElementById("sidebar").innerText = param[5].transName + "\r\n" + "公交消耗时间:" + 
+												param[5].time + "\r\n" + "打车消耗时间:" + param[5].time2 + "\r\n" + "公交/出租时间比:" + param[5].ratio; 
+											return param[5].transName + "<br/><br/>" + param[5].time + "<br/><br/>" + param[5].time2;
+										}
+									}
+                    },
+                    toolbox: {
+                        show : true,
+                        orient : 'vertical',
+                        x: 'right',
+                        y: 'center',
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    
+                    series : [
+                    {
+                        name: '换乘',
+                        type: 'map',
+                        mapType: 'none',
+                        itemStyle:{
+                            normal:{
+                                borderColor:'rgba(100,149,237,1)',
+                                borderWidth:0.5,
+                                areaStyle:{
+                                    color: '#1b1b1b'
+                                }
+                            }
+                        },
+                        data:[],
+                        markLine : {
+                            smooth:true,
+                            symbol: ['circle', 'circle'],  
+                            symbolSize : 1,
+                            effect : {
+                                show: true,
+                                scaleSize: 1,
+                                period: 30,
+                                color: '#fff',
+                                shadowBlur: 10
+                            },
+                            itemStyle : {
+                                normal: {
+                                    borderWidth:1,
+                                    lineStyle: {
+                                        type: 'solid',
+                                        shadowBlur: 10,
+                                        width: 2
+                                    },
+                                }
+                            },
+                            data : markLineData_trans,
+                        },
+                        geoCoord: geoData,
+                        markPoint : {
+                            symbol:'emptyCircle',
+                            symbolSize : 10,
+                            effect : {
+                                show: true,
+                                shadowBlur : 0
+                            },
+                            itemStyle:{
+                                normal:{
+									color:'red',
+                                    label:{show:false}
+                                },
+                                emphasis: {
+                                    label:{show:false}
+                                }
+                            },
+                            data: markPointData
+                        }
+                    }
+                ]
+            };
+            
+        
+        var myChart = BMapExt.initECharts(container);
+        BMapExt.setOption(options);
+		
+		/*
+		var ecConfig = require('echarts/config');
+		myChart.on(ecConfig.EVENT.HOVER, eConsole);
+		function eConsole(param){
+			alert(param.name); 
+	        //alert(param.value);
+			console.log(param);
+        }
+		*/
+		
+                    
+    });
+})();
+    </script>
+</html>

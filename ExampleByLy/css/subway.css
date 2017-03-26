@@ -1,0 +1,168 @@
+.navbar{
+background-color: rgba(0,0,0,0.7);
+}
+body{
+
+	font-family: 'microsoft Yahei';
+	background-color: #333;
+	color: white;
+	background-image: url(img/tweed.png);
+	background-repeat: repeat;
+	margin: 0 auto
+}
+header{
+
+	background-color: rgba(0,0,0,0.3);
+	text-align: center;
+	width: 100%;
+}
+.navbar-nav>li>a:hover{
+	background-color:rgba(255,255,255,0.05);
+}
+.navbar-nav>.active>a
+{
+	background-color: rgba(1,1,1,0.1);
+}
+.navbar a{
+	color: white;
+
+}
+.navbar-inverse a{
+	color: white;
+}
+a:focus{
+	background-color:rgba(0,0,0,0.4);
+}
+a:hover{
+		background-color:rgba(0,0,0,0.4);
+}
+a.list-group-item:focus,a.list-group-item:hover{
+	background-color:rgba(0,0,0,0.8);
+}
+.navbar a:focus{
+	background-color:rgba(0,0,0,0.8);
+}
+
+.header{
+	
+	background-repeat: no-repeat;
+	background-position: center 0;
+	background-size: cover;
+	padding-top: 80px;
+	color: white;
+}
+.header .container{
+	text-align: center
+}
+.header h1{
+	font-size: 50px
+}
+
+.text-block{
+	margin-top: 150px;
+	margin-bottom: 60px;
+
+	top: 100px;
+
+}
+#subway-graph{
+	padding-top: 50px;
+	height: 450px;
+}
+.subway-graph-container{
+	width: 100%;
+	height: 1500px;
+}
+.subway .legend{
+	width: 100%;
+	height: 40px;
+	float: left;
+}
+.text-info-block{
+  		
+  		border-radius: 8px;
+  		pointer-events: none;
+  		width: 450px;
+  		
+  		background-color: rgba(0,0,0,0.2);
+  		height: 80px;
+  		padding: 20px;
+  		color: white;
+
+}
+#flow-graph{
+	padding-left: 50px
+}
+#flow-graph text{
+	fill:#eee;
+	font-size: 8
+}
+.bar{
+	fill:white;
+
+}
+.bit-block{
+	opacity: 0.8
+}
+div.tooltip {
+ 		 position: absolute;
+  		text-align: center;
+  		width: 80px;
+ 		 height: 24px;
+ 		 padding-top: 4px;
+ 		 color: white;
+ 		
+  		background-color:rgba(0,0,0,0.2);
+  		opacity: 0.8;
+  		border: solid 1px #000;
+  		border-radius: 8px;
+  		pointer-events: none;
+}
+	.arc{
+		fill:#ec4161;
+		opacity: 0.8;
+	}
+#graph2{
+	width: 100%;
+	margin: 0 auto;
+	height: 1500px;
+	
+	float:left;
+	}
+#graph2-graph{
+	width: 100%;	
+}
+.tip-right{
+
+	width: 300px;
+	height: 100px;
+	background-color:rgba(0,0,0,0.2);
+	position: fixed;
+	margin-top: 80px;
+	padding: 20px;
+	top: 50px;
+	right: 30px;
+
+}
+.tip-right .title{
+	font-size: 18px;
+}
+.tip-right .content{
+	margin-top: 10px;
+	font-size: 10px;
+	color: #ddd;
+}
+.panel{
+	background: none;
+
+}
+.flow-bar{
+	opacity: 0.1;
+	fill:white;
+}
+
+h1 {
+	font-color: white;
+	text-align:center;
+	font-size:40px;
+}

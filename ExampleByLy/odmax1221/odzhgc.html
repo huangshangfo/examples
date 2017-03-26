@@ -1,0 +1,744 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>北京市中环广场周边交通流量规律</title>
+	<script src="js/jquery-1.8.3.min.js"></script>
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <script type="text/javascript" src = "assets/data/odmax_zhgco.json"></script>
+    <script type="text/javascript" src = "assets/data/odmax_zhgcd.json"></script>
+    <script type="text/javascript" src = "assets/data/odmaxs.json"></script>
+    <script type="text/javascript" src = "assets/data/odmaxsps.json"></script>
+    <script type="text/javascript" src = "assets/data/zones.json"></script>
+    <script src="assets/js/echarts.js"></script>
+    <script type="text/javascript" src = "assets/js/main.js"></script>
+    <style type="text/css">
+        * {margin:0; padding:0;}
+        body, html {width:100%;}
+        .sidebar{
+        position:absolute;
+        top:20%;
+        right:0;
+        width:450px;
+		height:500px;
+        max-height:50%;
+        z-index:200;
+        background-color:rgba(10,10,10,1);
+        color:#fff;
+        padding:20px;
+        }
+		.sidebarbtn{
+		position:absolute;
+		width:3%;
+		height:20px;
+		right:2%;
+		top:15%;
+		}
+		
+		.footbar{
+        position:absolute;
+        top:60%;
+        max-height:30%;
+        z-index:200;
+        background-color:rgba(10,10,10,1);
+        color:#fff;
+        padding:0px;
+        }
+		.footbarbtn{
+		position:absolute;
+		width:70px;
+		height:35px;
+		left:0%;
+		top:55%;
+		}
+    </style>
+</head>
+<script>
+	refresh = function(){
+		if(window.onresize){
+		  //这里写刷新 
+		  document.location.reload(); 
+		  //console.log("窗口最大化"); //为了方便看到效果这里 用个alert
+		}
+	}
+</script>
+<body onresize="refresh()">
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <!--  <div id="main"></div>   -->
+	   
+	<div class="main" id="main">  </div>
+	<div class="sidebar" id="sidebar" style="color:orange;font-family:幼圆;font-size:20px">
+	</div>
+	<div class="footbar" id ="footbar" style="color:white;font-family:幼圆;font-size:20px">
+	</div>
+	<div class="sidebarbtn" id="sidebarbtn">
+	  <button type="button" class="btn btn-info"onclick="hideshow(1)">柱形图</button>
+	</div>
+	<div class="footbarbtn" id ="footbarbtn">
+	  <button type="button" class="btn btn-info" onclick="hideshow(2)">折线图</button>
+	</div>
+    <script type="text/javascript">
+        var maindiv = document.getElementById("main");
+		var footbardiv = document.getElementById("footbar");
+		var sidebardiv = document.getElementById("sidebar");
+		//var footbarbtndiv = document.getElementById("footbarbtn");
+		//var sidebarbtndiv = document.getElementById("sidebarbtn");
+        maindiv.style.height = document.body.clientHeight+"px";
+		footbardiv.style.height = 0.30*document.body.clientHeight+"px";
+		footbardiv.style.width  = document.body.clientWidth+"px";
+		sidebardiv.style.height = 0.5*document.body.clientHeight+"px";
+		sidebardiv.style.width  = 0.5*document.body.clientWidth+"px";
+    </script>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+<script type="text/javascript">
+	function hideshow(val){
+			if(val=='1'){
+				$("#sidebar").toggle();
+			}
+			if(val=='2'){
+				$("#footbar").toggle();
+			}
+		}
+</script>
+
+<script type="text/javascript">
+	(function(){
+        var lineso = odmax_zhgco.map(function(o){
+            return o.map(function(p){
+                return [{ name : "北京市中环广场周边"},{ name : zones[p.d-1].name , value : p.flow}];
+            });
+        });
+
+        var linesd = odmax_zhgcd.map(function(o){
+            return o.map(function(p){
+                return [{ name : zones[p.o-1].name},{ name : "北京市中环广场周边" , value : p.flow}];
+            });
+        });
+
+
+        var liness = odmaxs.map(function(o){
+            return o.map(function(p){
+                return [{ name : zones[p.o-1].name},{ name : zones[p.d-1].name , value : p.flow}];
+            });
+        });
+
+        var geodata = {};
+        zones.forEach(function(o){
+            _name = o.name;
+            _centerX = o.centerX;
+            _centerY = o.centerY;
+            geodata[_name] = [_centerX,_centerY];
+        });
+		
+		geodata["北京市中环广场周边"] = [116.358797,39.888703];
+
+        var datearr = [];
+        for (var i=0;i < 24; i++){
+            if(i<10){
+                datearr.push("2015-04-20 0"+i+":00:00");
+                datearr.push("2015-04-20 0"+i+":30:00");
+            }else{
+                datearr.push("2015-04-20 "+i+":00:00");
+                datearr.push("2015-04-20 "+i+":30:00");           
+            }
+  
+        }
+        var pointsomap0 = lineso[0].reduce(function(p,c){
+            p[c[0].name] = (p[c[0].name])?(p[c[0].name]+c[1].value):(c[1].value);
+            return p;
+        },{});
+
+        var pointso0 = [];
+        for (var name in pointsomap0){
+            pointso0.push({name : name , value : pointsomap0[name] });
+        }
+
+        var pointsdmap0 = linesd[0].reduce(function(p,c){
+            p[c[1].name] = (p[c[1].name])?(p[c[1].name]+c[1].value):(c[1].value);
+            return p;
+        },{});
+
+        var pointsd0 = [];
+        for (var name in pointsdmap0){
+            pointsd0.push({name : name , value : pointsdmap0[name] });
+        }
+
+        var sps = odmaxsps.map(function(o){
+            return o.map(function(o){
+                return {name:zones[o.p-1].name,value:o.v};
+            });
+        });
+        // .map(function(o){
+        //     return {name:o.name,value:o.value};
+        // });
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/map',
+				'echarts/chart/line',
+				'echarts/chart/bar'
+            ],
+
+			function (echarts, BMapExtension) {
+			// 基于准备好的dom，初始化echarts图表
+			// 初始化地图
+			var mapcon = document.getElementById("main");
+			var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+				enableMapClick: false
+			});
+			var map = BMapExt.getMap();
+			var container = BMapExt.getEchartsContainer();
+
+			var startPoint = {x:116.404323,y:39.907566};
+			var point = new BMap.Point(startPoint.x, startPoint.y);
+			map.centerAndZoom(point, 11);
+			map.enableScrollWheelZoom(true);
+			// 地图自定义样式
+			map.setMapStyle({
+				styleJson: [
+					  {
+						   "featureType": "water",
+						   "elementType": "all",
+						   "stylers": {
+								"color": "#044161"
+						   }
+					  },
+					  {
+						   "featureType": "land",
+						   "elementType": "all",
+						   "stylers": {
+								"color": "#000000"
+						   }
+					  },
+					  {
+						   "featureType": "boundary",
+						   "elementType": "geometry",
+						   "stylers": {
+								"color": "#064f85"
+						   }
+					  },
+					  {
+						   "featureType": "railway",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "highway",
+						   "elementType": "geometry",
+						   "stylers": {
+								"color": "#000000"
+						   }
+					  },
+					  {
+						   "featureType": "highway",
+						   "elementType": "geometry.fill",
+						   "stylers": {
+								"color": "#005b96",
+								"lightness": 1
+						   }
+					  },
+					  {
+						   "featureType": "highway",
+						   "elementType": "labels",
+						   "stylers": {
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "arterial",
+						   "elementType": "geometry",
+						   "stylers": {
+								"color": "#000000"
+						   }
+					  },
+					  {
+						   "featureType": "arterial",
+						   "elementType": "geometry.fill",
+						   "stylers": {
+								"color": "#00508b"
+						   }
+					  },
+					  {
+						   "featureType": "poi",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "on"
+						   }
+					  },
+					  {
+						   "featureType": "green",
+						   "elementType": "all",
+						   "stylers": {
+								"color": "#056197",
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "subway",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "on"
+						   }
+					  },
+					  {
+						   "featureType": "manmade",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "local",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "arterial",
+						   "elementType": "labels",
+						   "stylers": {
+								"visibility": "off"
+						   }
+					  },
+					  {
+						   "featureType": "boundary",
+						   "elementType": "geometry.fill",
+						   "stylers": {
+								"color": "#029fd4"
+						   }
+					  },
+					  {
+						   "featureType": "building",
+						   "elementType": "all",
+						   "stylers": {
+								"color": "#1a5787"
+						   }
+					  },
+					  {
+						   "featureType": "label",
+						   "elementType": "all",
+						   "stylers": {
+								"visibility": "on"
+						   }
+					  }
+				]
+			});
+
+			option = {
+				timeline:{
+				data:datearr,
+					label : {
+						formatter : function(s) {
+							return s.slice(11, 16);
+						},
+						textStyle : {
+							color: '#fff'
+						}
+					},
+					autoPlay : true,
+					playInterval : 5000
+				},
+
+				options:[
+					{
+
+						color: ['gold','aqua','lime'],
+						title:{
+							text: '北京市中环广场周边交通流量规律',
+							subtext:'时间：2015年4月20日 星期一',
+							x:'center',
+							textStyle : {
+								"color": "#fff",
+								"fontSize": 40,
+								"fontFamily": "黑体"
+							},
+							subtextStyle : {
+								"fontSize": 20,
+								"fontFamily": "楷体"
+							}
+						},
+						tooltip : {
+							trigger: 'item',
+							formatter: '{b}'
+						},
+						legend: {
+							orient: 'vertical',
+							x:'left',
+							data:['以该点为出发地','以该点为目的地'],
+							selectedMode: 'single',
+							selected:{
+								'以该点为目的地' : false
+							},
+							textStyle : {
+								color: '#fff',
+								"fontSize": 16
+							}
+						},
+						toolbox: {
+							show : true,
+							orient : 'vertical',
+							x: 'right',
+							y: 'center',
+							feature : {
+								mark : {show: true},
+								dataView : {show: true, readOnly: false},
+								restore : {show: true},
+								saveAsImage : {show: true}
+							}
+						},
+						dataRange: {
+							min : 0,
+							max : 300,
+							calculable : true,
+							x: 100,
+							y: document.body.clientHeight*0.3,
+							color: ['#ff3333', 'orange', 'yellow','lime','aqua'],
+							textStyle:{
+								color:'#fff'
+							}
+						},
+						series : [
+						{
+							name: '以该点为出发地',
+							type: 'map',
+							mapType: 'none',
+							itemStyle:{
+								normal:{
+									borderColor:'rgba(100,149,237,1)',
+									borderWidth:0.5,
+									areaStyle:{
+										color: '#1b1b1b'
+									}
+								}
+							},
+							data:[],
+							markLine : {
+								smooth:true,
+								symbol: ['circle', 'circle'],  
+								symbolSize : 1,
+								effect : {
+									show: true,
+									scaleSize: 1,
+									period: 30,
+									color: '#fff',
+									shadowBlur: 10
+								},
+								itemStyle : {
+									normal: {
+										borderWidth:1,
+										lineStyle: {
+											type: 'solid',
+											shadowBlur: 5
+										}
+									}
+								},
+								data : lineso[0],
+							},
+							geoCoord: geodata,
+							markPoint : {
+								symbol:'emptyCircle',
+								symbolSize : function (v){
+									return Math.min(5 + v/400,20)
+								},
+								effect : {
+									show: true,
+									shadowBlur : 0
+								},
+								itemStyle:{
+									normal:{
+										label:{show:false}
+									},
+									emphasis: {
+										label:{position:'top'}
+									}
+								},
+								//data : lineso[0].map(function(o){return o[0]})
+								data: pointso0
+							}
+						},{
+							name: '以该点为目的地',
+							type: 'map',
+							mapType: 'none',
+							itemStyle:{
+								normal:{
+									borderColor:'rgba(100,149,237,1)',
+									borderWidth:0.5,
+									areaStyle:{
+										color: '#1b1b1b'
+									}
+								}
+							},
+							data:[],
+							markLine : {
+								smooth:true,
+								symbol: ['circle', 'circle'],  
+								symbolSize : 1,
+								effect : {
+									show: true,
+									scaleSize: 1,
+									period: 30,
+									color: '#fff',
+									shadowBlur: 10
+								},
+								itemStyle : {
+									normal: {
+										borderWidth:1,
+										lineStyle: {
+											type: 'solid',
+											shadowBlur: 5
+										}
+									}
+								},
+								data : linesd[0],
+							},
+							geoCoord: geodata,
+							markPoint : {
+								symbol:'emptyCircle',
+								symbolSize : function (v){
+									return Math.min(5 + v/200,30)
+								},
+								effect : {
+									show: true,
+									shadowBlur : 0
+								},
+								itemStyle:{
+									normal:{
+										label:{show:false}
+									},
+									emphasis: {
+										label:{position:'top'}
+									}
+								},
+								data : pointsd0
+							}
+						}
+					]
+				}]
+				
+			};
+			
+			var busoi = [];
+			var busdi = [];
+			var buscountoi = [];
+			var buscountdi = [];
+			var myChart1 = echarts.init(document.getElementById('sidebar')); //条形图
+			var myChart2 = echarts.init(document.getElementById('footbar'));//堆积折线图
+
+			
+
+
+			for (var i=1;i<48;i++){
+				var pointsomapi = lineso[i].reduce(function(p,c){
+					p[c[0].name] = (p[c[0].name])?(p[c[0].name]+c[1].value):(c[1].value);
+					return p;
+				},{});
+
+				var pointsoi = [];
+				for (var name in pointsomapi){
+					pointsoi.push({name : name , value : pointsomapi[name] });
+				}
+
+				var pointsdmapi = linesd[i].reduce(function(p,c){
+					p[c[1].name] = (p[c[1].name])?(p[c[1].name]+c[1].value):(c[1].value);
+					return p;
+				},{});
+
+				var pointsdi = [];
+				for (var name in pointsdmapi){
+					pointsdi.push({name : name , value : pointsdmapi[name] });
+				}
+				option.options.push({series:[
+						{
+							markLine:{data:lineso[i]},
+							markPoint:{
+								data:pointsoi
+							}
+						},{
+							markLine:{data:linesd[i]},
+							markPoint:{
+								data:pointsdi
+							}
+						}
+					]});
+				
+			}
+			
+			var myChart = BMapExt.initECharts(container);
+			BMapExt.setOption(option);
+			var ecConfig = require('echarts/config');
+			myChart.on(ecConfig.EVENT.TIMELINE_CHANGED, function(o){
+			  //alert(o.currentIndex);
+			 var baroption = {
+			 backgroundColor: 'rgba(0,0,0,0.8)',
+				title : {
+					text: '',
+					textStyle:{color:'#fff'}
+				},
+				tooltip : {
+					trigger: 'axis',
+					textStyle:{color:'#fff'}
+				},
+				legend: {
+					data:['出发量','到达量'],
+					textStyle:{color:'#fff'}
+				},
+				calculable : true,
+				yAxis : [
+					{
+						type : 'value',
+						splitLine:{ 
+							show:false 
+						},
+						boundaryGap : [0, 0.1],
+						axisLabel:{textStyle:{color:'#fff'}}
+					}
+				],
+				xAxis : [
+					{
+						type : 'category',
+						splitLine:{ 
+							show:false 
+						},
+						data : ['枣林前街西口','白纸坊路口西','建功北里','广安门南','白纸坊桥北','白广路','菜园街','枣林前街'
+						,'椿树馆街','白纸坊','白广路北口','南线阁','南菜园'],
+						axisLabel:{textStyle:{color:'#fff'},
+							rotate:30}
+					}
+				],
+				grid:{
+					backgroundColor:'rgba(10,10,10,0.8)',
+					borderWidth:0
+				},
+				series : [
+					{
+						name:'出发量',
+						type:'bar',
+						data:stopso[o.currentIndex],
+						itemStyle : {  
+							normal : {  
+								color : '#006699',  
+								
+							}  
+						}
+					},
+					{
+						name:'到达量',
+						type:'bar',
+						data:stopsd[o.currentIndex],
+						itemStyle : {  
+							normal : {  
+								color : '#006600',  
+								
+							}  
+						}
+					}
+				]
+			};
+			var footoption = {
+			backgroundColor: 'rgba(0,0,0,0.8)',
+				title : {
+					text: '',
+				},
+				tooltip : {
+					trigger: 'axis',
+					textStyle:{color:'#fff'}
+				},
+				legend: {
+					data:['出发量','到达量'],
+					textStyle:{color:'#fff'}
+				},
+				calculable : true,
+				xAxis : [
+					{
+						type : 'category',
+						splitLine:{ 
+							show:false 
+						},
+						boundaryGap : false,
+						data : ['0:00','0:30','1:00','1:30','2:00','2:30','3:00','3:30','4:00','4:30','5:00','5:30','6:00','6:30','7:00','7:30','8:00','8:30','9:00','9:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30','23:00','23:30','24:00'],
+						axisLabel:{textStyle:{color:'#fff'}}
+					}
+				],
+				yAxis : [
+					{
+						type : 'value',
+						splitLine:{ 
+							show:false 
+						},
+						axisLabel:{textStyle:{color:'#fff'}}
+					}
+				],
+				grid:{
+					backgroundColor:'rgba(10,10,10,0.8)',
+					borderWidth:0
+				},
+				series : [
+					{
+						name:'出发量',
+						type:'line',
+						smooth:true,
+						itemStyle: {normal: {areaStyle: {type: 'default'}}},
+						data:otimeline.slice(0,o.currentIndex+1)
+					},
+					{
+						name:'到达量',
+						type:'line',
+						smooth:true,
+						itemStyle: {normal: {areaStyle: {type: 'default'}}},
+						data:dtimeline.slice(0,o.currentIndex+1)
+					}
+				]
+			};
+				myChart1.setOption(baroption);
+				myChart2.setOption(footoption);		
+			  var i = o.currentIndex;
+			  var pointsomapi = lineso[i].reduce(function(p,c){
+					p[c[0].name] = (p[c[0].name])?(p[c[0].name]+c[1].value):(c[1].value);
+					return p;
+				},{});
+
+				var pointsoi = [];
+				for (var name in pointsomapi){
+					pointsoi.push({name : name , value : pointsomapi[name] });
+				}
+
+				var pointsdmapi = linesd[i].reduce(function(p,c){
+					p[c[1].name] = (p[c[1].name])?(p[c[1].name]+c[1].value):(c[1].value);
+					return p;
+				},{});
+
+				var pointsdi = [];
+				for (var name in pointsdmapi){
+					pointsdi.push({name : name , value : pointsdmapi[name] });
+				}
+				
+			});
+				
+		});
+	}
+)();
+    </script>
+</html>

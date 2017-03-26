@@ -1,0 +1,352 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>OD展示模板</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <script type="text/javascript" src = "assets/data/od_demo_timeline.json"></script>
+    <script src="assets/js/echarts.js"></script>
+    <style>
+        * {margin:0; padding:0;}
+        body, html {width:100%;}
+    </style>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+      <div class="main" id="main">  </div>
+
+    <script type="text/javascript">
+        var maindiv = document.getElementById("main");
+        maindiv.style.height = document.body.clientHeight+"px";
+    </script>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+        (function(){
+		
+		var datearr = [];
+        for (var i=0;i < 24; i++){
+            if(i<10){
+                datearr.push("2015-04-20 0"+i+":00:00");
+                datearr.push("2015-04-20 0"+i+":30:00");
+            }else{
+                datearr.push("2015-04-20 "+i+":00:00");
+                datearr.push("2015-04-20 "+i+":30:00");           
+            }
+  
+        }
+		
+		
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/map' // 
+            ],
+
+        function (echarts, BMapExtension) {
+    // 基于准备好的dom，初始化echarts图表
+        // 初始化地图
+        var mapcon = document.getElementById("main");
+        var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+            enableMapClick: false
+        });
+        var map = BMapExt.getMap();
+        var container = BMapExt.getEchartsContainer();
+		
+		//北京坐标
+        var startPoint = {x:116.404323,y:40.000566};
+		//重庆坐标
+		//var startPoint = {x:106.549116,y:29.566725};
+        var point = new BMap.Point(startPoint.x, startPoint.y);
+        map.centerAndZoom(point, 12);
+        map.enableScrollWheelZoom(true);
+        // 地图自定义样式
+        map.setMapStyle({
+            styleJson: [
+                  {
+                       "featureType": "water",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#044161"
+                       }
+                  },
+                  {
+                       "featureType": "land",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#064f85"
+                       }
+                  },
+                  {
+                       "featureType": "railway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#005b96",
+                            "lightness": 1
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#00508b"
+                       }
+                  },
+                  {
+                       "featureType": "poi",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "green",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#056197",
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "subway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "manmade",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "local",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#029fd4"
+                       }
+                  },
+                  {
+                       "featureType": "building",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#1a5787"
+                       }
+                  },
+                  {
+                       "featureType": "label",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  }
+            ]
+        });
+		
+		option = {
+            timeline:{
+            data:datearr,
+                label : {
+                    formatter : function(s) {
+                        return s.slice(11, 16);
+                    },
+                    textStyle : {
+                        color: '#fff'
+                    }
+                },
+                autoPlay : true,
+                playInterval : 1000
+            },
+			
+            options :[ 
+                {
+
+                    color: ['gold','aqua','lime'],
+                    title:{
+                        text: 'OD展示模板',
+                        x:'center',
+                        textStyle : {
+                            "color": "#fff",
+                            "fontSize": 50,
+                            "fontFamily": "黑体"
+                        },
+                        subtextStyle : {
+                            "fontSize": 30,
+                            "fontFamily": "楷体"
+                        }
+                    },
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: '{b}'
+                    },
+                    toolbox: {
+                        show : true,
+                        orient : 'vertical',
+                        x: 'right',
+                        y: 'center',
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    dataRange: {
+                        min : 0,
+                        max : 120,
+                        calculable : true,
+                        x: 100,
+                        y: document.body.clientHeight-250,
+                        color: ['#ff3333', 'orange', 'yellow','lime','aqua'],
+                        textStyle:{
+                            color:'#fff'
+                        }
+                    },
+                    series : [
+                    {
+                        name: '按o排序',
+                        type: 'map',
+                        mapType: 'none',
+                        itemStyle:{
+                            normal:{
+                                borderColor:'rgba(100,149,237,1)',
+                                borderWidth:0.5,
+                                areaStyle:{
+                                    color: '#1b1b1b'
+                                }
+                            }
+                        },
+                        data:[],
+                        markLine : {
+                            smooth:true,
+                            symbol: ['circle', 'circle'],  
+                            symbolSize : 1,
+                            effect : {
+                                show: true,
+                                scaleSize: 1,
+                                period: 30,
+                                color: '#fff',
+                                shadowBlur: 10
+                            },
+                            itemStyle : {
+                                normal: {
+                                    borderWidth:1,
+                                    lineStyle: {
+                                        type: 'solid',
+                                        shadowBlur: 10,
+                                        width: 1
+                                    }
+                                }
+                            },
+                            data : markLineData[0],
+                        },
+                        geoCoord: geoData,
+                        markPoint : {
+                            symbol:'emptyCircle',
+                            symbolSize : 10,
+                            effect : {
+                                show: true,
+                                shadowBlur : 0
+                            },
+                            itemStyle:{
+                                normal:{
+                                    label:{show:false}
+                                },
+                                emphasis: {
+                                    label:{position:'top'}
+                                }
+                            },
+                            //data : lineso[0].map(function(o){return o[0]})
+                            data: markPointData[0]
+                        }
+                    }
+                ]
+            }]
+        };   
+        
+		for(var i = 1; i < 3; i++){
+			option.options.push(
+				{series:[
+                    {
+                        markLine:{data:markLineData[i]},
+                        markPoint:{data:markPointData[i]}
+                    }
+				]}
+			);
+		}
+		
+        var myChart = BMapExt.initECharts(container);
+        BMapExt.setOption(option);
+                    
+    });
+})();
+    </script>
+</html>

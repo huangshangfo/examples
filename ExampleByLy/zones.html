@@ -1,0 +1,66 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<style>
+			body{
+				margin: 0;
+			}
+			#main{
+				height: 100%;
+			}
+			#slider{
+				height: 10%;
+			}
+			canvas{
+		      position: fixed;
+		      top: 0px;
+		      left: 0px;
+		    }
+		    #slider {
+		    	position:fixed;
+		    	width:60%;
+		    	height:10px;
+		    	bottom:50px;
+		    	left:20%;
+		    }
+		    .timespan{
+		    	position:fixed;
+		    	bottom:70px;
+		    	color:#fff;
+		    }
+		    .header{
+		    	position:fixed;
+		    	top:80px;
+		    	left:15%;
+		    	color:#fff;
+		    	z-index:200;
+		    	font-size:50px;
+		    	font-family:"华文琥珀"
+		    	
+		    }
+		</style>
+	</head>
+	<body>
+	<div class="header">
+	北京公交客流量分区展示
+	</div>
+		<div id="main">
+		
+
+		</div>
+			<div id="slider">
+			</div>
+	</body>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+	
+	<script language="javascript" src="http://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.4/p5.js"></script>
+	<script type="text/javascript" src="assets/data/transzone20150420.json"></script>
+	<script type="text/javascript" src="assets/js/baidup5.js"></script>
+	
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+
+</html>

@@ -1,0 +1,725 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>手机信令出行</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+	<script type="text/javascript" src = "assets/data/phone/phone_trip_sel.json"></script>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/jquery.bootstrap-autohidingnavbar.min.js"></script>
+    <script src="assets/js/echarts.js"></script>
+    <script type="text/javascript" src = "assets/js/main.js"></script>
+    
+    <style type="text/css">
+	
+	body{
+		/*background-color: #333;*/
+		margin:0px;
+	}
+	
+	.mainContent {
+		/*background-color: rgb(200,0,0);*/
+		background-color: #333;
+		width:100%;
+		height:900px;
+	}
+
+	#left {
+		/*background-color: rgb(0,200,0);*/
+		float:left;
+		height:100%;
+		width:70%;
+		padding:10px;
+		margin-left:5px;
+		margin-right:10px;
+	}
+	
+	#map {
+		/*background-color: rgb(0,200,0);*/
+		float:left;
+		height:80%;
+		width:100%;
+		padding:5px;
+		margin:5px;
+	}
+	
+	#fig3 {
+		/*background-color: rgb(0,200,70);*/
+		float:left;
+		height:20%;
+		width:100%;
+		padding:5px;
+		margin:5px;
+	}
+	
+	#right {
+		/*background-color: rgb(0,0,200);*/
+		float:right;
+		height:100%;
+		width:25%;
+		padding:5px;
+	}
+
+	#seldate {
+		/*background-color: rgb(0,200,200);*/
+		height:10%;
+		width:100%;
+		padding:15px;
+		padding-top:30px;
+		
+		margin-bottom:5px;
+	}
+
+	#fig1 {
+		/*background-color: rgb(200,0,200);*/
+		height:42%;
+		width:100%;
+		padding:10px;
+		margin-bottom:5px;
+	}
+
+	#fig2 {
+		/*background-color: rgb(0,200,200);*/
+		height:42%;
+		width:100%;
+		padding:10px;
+	}
+
+	svg{
+		position:relative;
+	}
+	
+	#selid {
+	    position:absolute;
+		padding:10px;
+	}
+	
+	.sel_font {
+		float:left;
+		color:white;
+		font-size:20px;
+		font-weight:bold;
+	}
+	
+	.sel_select {
+		float:left;
+		color:black;
+		font-size:20px;
+		
+	}
+
+	path {
+		stroke: #fff;
+		stroke-width: .5px;
+	}
+	 
+	path:hover {
+		fill-opacity: 0.8;
+	}
+
+	h1 {color:white;}
+	h2 {color:white;}
+ 
+    </style>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div class="mainContent">
+    <div id="left">
+	    <div id="map"></div>
+    	<div id="fig3"></div>
+		<div id="selid">
+			<div class="sel_font">请选择用户：  </div>
+			
+			<select class="sel_select" id="yonghu">
+				
+			</select>
+			
+		</div>
+    	
+    </div>
+    <div id= "right">
+      <div id="seldate">
+			<p class="sel_font">请选择日期：  </p>
+			<p>
+			<select class="sel_select" id="riqi">
+				
+			</select>
+			</p>
+		</div>
+		<div id="fig1" ></div>
+		<div id="fig2"></div>
+    </div>
+  </div>
+
+    
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+        
+	    var geoData = null;
+		var markLineData = [];
+		var markPointData = [];
+		var markPointData2 = [];
+		var count_legend_data = null;
+		var count_data = null;
+		var duration_legend_data = null;
+		var duration_data = null;
+		var line_data = null;
+		var line_data2 = null;
+		
+		var select_riqi = document.getElementById('riqi');
+		for(var i = 0; i < opt_date.length; i++){
+		    var option = document.createElement("option");
+			option.innerText = opt_date[i][0];
+			option.value = opt_date[i][1];
+			select_riqi.appendChild(option);
+		}
+		
+		var select_yonghu = document.getElementById('yonghu');
+		for(var i = 0; i < opt_user.length; i++){
+		    var option = document.createElement("option");
+			option.innerText = opt_user[i][0];
+			option.value = opt_user[i][1];
+			select_yonghu.appendChild(option);
+		}
+		//alert(document.getElementById('riqi').value);
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/map',
+                'echarts/chart/line',  
+                'echarts/chart/bar',
+				'echarts/chart/pie' //
+            ],
+		
+		
+		
+        function (echarts, BMapExtension) {
+    // 基于准备好的dom，初始化echarts图表
+    		
+    		var myChart1 = echarts.init(document.getElementById('fig1')); //饼状图1
+	 			var myChart2 = echarts.init(document.getElementById('fig2')); //柱状图2
+	 			var myChart3 = echarts.init(document.getElementById('fig3'));//柱状图3
+    
+        // 初始化地图
+        var mapcon = document.getElementById("map");
+        var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+            enableMapClick: false
+        });
+        var map = BMapExt.getMap();
+        var container = BMapExt.getEchartsContainer();
+		
+		//北京坐标
+        var startPoint = {x:116.404323,y:40.000566};
+		//重庆坐标
+		//var startPoint = {x:106.549116,y:29.566725};
+        var point = new BMap.Point(startPoint.x, startPoint.y);
+        map.centerAndZoom(point, 12);
+        map.enableScrollWheelZoom(true);
+        // 地图自定义样式
+        map.setMapStyle({
+            styleJson: [
+                  {
+                       "featureType": "water",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#044161"
+                       }
+                  },
+                  {
+                       "featureType": "land",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#064f85"
+                       }
+                  },
+                  {
+                       "featureType": "railway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#005b96",
+                            "lightness": 1
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#00508b"
+                       }
+                  },
+                  {
+                       "featureType": "poi",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "green",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#056197",
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "subway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "manmade",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "local",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#029fd4"
+                       }
+                  },
+                  {
+                       "featureType": "building",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#1a5787"
+                       }
+                  },
+                  {
+                       "featureType": "label",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  }
+            ]
+        });
+//地图 map
+            options = 
+                {
+
+                    color: ['gold','aqua','lime'],
+                    title:{
+                        text: '手机信令出行展示',
+                        x:'center',
+                        textStyle : {
+                            "color": "#fff",
+                            "fontSize": 50,
+                            "fontFamily": "黑体"
+                        },
+                        subtextStyle : {
+                            "fontSize": 30,
+                            "fontFamily": "楷体"
+                        }
+                    },
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: '{b}'
+                    },
+                    toolbox: {
+                        show : true,
+                        orient : 'vertical',
+                        x: 'right',
+                        y: 'center',
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    dataRange: {
+					        show:false,
+							min : 0,
+							max : 300,
+							calculable : true,
+							x: 100,
+							y: document.body.clientHeight*0.3,
+							color: ['#ff3333', 'orange', 'yellow','lime','aqua'],
+							textStyle:{
+								color:'#fff'
+							}
+						},
+                    series : [
+					//第一种点形状+线
+                    {
+                        name: '用户',
+                        type: 'map',
+                        mapType: 'none',
+                        itemStyle:{
+                            normal:{
+                                borderColor:'rgba(100,149,237,1)',
+                                borderWidth:0.5,
+                                areaStyle:{
+                                color: '#1b1b1b'
+                                }
+                            }
+                        },
+                        data:[],
+                        markLine : {
+                            smooth:true,
+                            symbol: ['circle', 'circle'],  
+                            symbolSize : 1,
+                            effect : {
+                                show: true,
+                                scaleSize: 1,
+                                period: 30,
+                                color: '#fff',
+                                shadowBlur: 10
+                            },
+                            itemStyle : {
+                                normal: {
+                                    borderWidth:1,
+                                    lineStyle: {
+                                        type: 'solid',
+                                        shadowBlur: 10,
+                                        width: 1
+                                    },
+									label:{show:false},
+									color:'#11EE3D'
+                                }
+                            },
+                            data : markLineData,
+                        },
+                        geoCoord: geoData,
+                        markPoint : {
+                            symbol:'emptyCircle',
+                            symbolSize : 3,
+                            effect : {
+                                show: true,
+                                shadowBlur : 0
+                            },
+                            itemStyle:{
+                                normal:{
+									
+                                    label:{show:false},
+									color:'#11EE3D'
+                                },
+                                emphasis: {
+									
+                                    label:{show:false}
+                                }
+                            },
+                            //data : lineso[0].map(function(o){return o[0]})
+                            data: markPointData
+                        }
+                    },
+					//第二种点形状
+					{
+                        name: '用户',
+                        type: 'map',
+                        mapType: 'none',
+                        itemStyle:{
+                            normal:{
+                                borderColor:'rgba(100,149,237,1)',
+                                borderWidth:0.5,
+                                areaStyle:{
+                                    color: '#1b1b1b'
+                                }
+                            }
+                        },
+                        data:[],
+                        geoCoord: geoData,
+                        markPoint : {
+                            symbol:'emptyDiamond',
+                            symbolSize : 10,
+                            effect : {
+                                show: true,
+                                shadowBlur : 0
+                            },
+                            itemStyle:{
+                                normal:{
+									
+                                    label:{show:false},
+									color:'#11EE3D'
+                                },
+                                emphasis: {
+									
+                                    label:{show:false}
+                                }
+                            },
+                            //data : lineso[0].map(function(o){return o[0]})
+                            data: markPointData2
+                        }
+                    },
+                ]
+            };
+            
+        
+        var myChart = BMapExt.initECharts(container);
+        BMapExt.setOption(options);
+        
+        //饼状图1 fig1 //地图右上方
+        var fig1option = 
+        {
+        	
+    title : {
+        text: '用户停留点数量分布',
+        x:'right',
+		textStyle:{color:'#fff'}
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)",
+		textStyle:{color:'#fff'}
+    },
+    legend: {
+        orient: 'vertical',
+        x: 'left',
+        data: count_legend_data,
+		textStyle:{color:'#fff'}
+    },
+    series : [
+        {
+            name: '访问来源',
+            type: 'pie',
+            radius : '55%',
+            center: ['50%', '60%'],
+            data:count_data,
+            itemStyle: {
+                emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        }
+    ]
+
+};
+//柱形图 fig2 //地图右下方
+var fig2option = {
+    title : {
+        text: '停留点时长分布',
+		textStyle:{color:'#fff'}
+    },
+    tooltip : {
+        trigger: 'axis',
+		textStyle:{color:'#fff'}
+    },
+    legend: {
+        y:'10%',
+		x:'right',
+        data:['时长'],
+		textStyle:{color:'#fff'}
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            data : duration_legend_data,
+			axisLabel:{textStyle:{color:'#fff'}}
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+			axisLabel:{textStyle:{color:'#fff'}}
+        }
+    ],
+    series : [
+        {
+            name:'时长',
+            type:'bar',
+            data:duration_data,
+			itemStyle : {  
+							normal : {  
+								color : '#6495ED',  
+								
+							}  
+						},
+            markPoint : {
+                data : [
+                    {type : 'max', name: '最大值'},
+                    {type : 'min', name: '最小值'}
+                ]
+            },
+            markLine : {
+                data : [
+                    {type : 'average', name: '平均值'}
+                ]
+            }
+        }
+        
+    ]
+};
+//柱形图 fig3 //地图下方
+   var fig3option = {
+    title : {
+        text: '全样本每小时停留点数量',
+		textStyle:{color:'#fff'}
+    },
+    tooltip: {
+        trigger: 'axis'
+    },
+    toolbox: {
+        feature: {
+            dataView: {show: true, readOnly: false},
+            magicType: {show: true, type: ['line', 'bar']},
+            restore: {show: true},
+            saveAsImage: {show: true}
+        }
+    },
+    legend: {
+        data:['信令数据量','信令数据量2'],
+		textStyle:{color:'#fff'}
+    },
+    xAxis: [
+        {
+          	type : 'category',
+						splitLine:{ 
+							show:false 
+						},
+						boundaryGap : [0, 0.01],
+						data : ['1:00','2:00','3:00','4:00','5:00','6:00','7:00','8:00','9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00','24:00'],
+						axisLabel:{textStyle:{color:'white'}}
+        }
+    ],
+    yAxis: [
+        {
+            type: 'value',
+            name: '百次',
+		splitLine:{ 
+							show:true 
+						},
+						axisLabel:{textStyle:{color:'white'}}
+					
+        }
+    ],
+    series: [
+        {
+            name:'信令数据量',
+            type:'bar',
+            data:line_data
+        },
+		{
+            name:'信令数据量2',
+            type:'line',
+            data:line_data2
+        }
+    ]
+};
+
+		
+		
+		var ecConfig = require('echarts/config');
+		myChart.on(ecConfig.EVENT.CLICK, eConsole);
+		function eConsole(param){
+		    if(typeof(param.data.other) != "undefined"){
+			    alert(param.data.other);
+			}
+        }
+		
+		var dataroot = "assets/data/phone/phone_trip_20130226_3699455709439481900.json";
+		window.onload = function(){
+			$.getJSON(dataroot, function(data){ 
+			//alert("test");
+			console.log(fig2option);
+			options.series[0].geoCoord = data.geoData;
+			options.series[1].geoCoord = data.geoData;
+			options.series[0].markLine.data = data.markLineData;
+			options.series[0].markPoint.data = data.markPointData;
+			options.series[1].markPoint.data = data.markPointData2;
+			
+            fig1option.legend.data = data.count_legend_data;
+			fig1option.series[0].data = data.count_data;
+			fig2option.xAxis[0].data = data.duration_legend_data;
+			fig2option.series[0].data = data.duration_data;
+			fig3option.series[0].data = data.line_data;
+			fig3option.series[1].data = data.line_data2;
+			
+			BMapExt.setOption(options);
+            myChart1.setOption(fig1option);
+            myChart2.setOption(fig2option); 
+ 		    myChart3.setOption(fig3option);
+			
+		    });
+		}
+                    
+    });
+
+    </script>
+</html>

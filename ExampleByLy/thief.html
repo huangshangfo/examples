@@ -1,0 +1,621 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<head>
+    <meta charset="utf-8">
+    <title>北京市公共交通出行</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <script type="text/javascript" src = "assets/data/od_demo.json"></script>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+    <script src="assets/js/echarts.js"></script>
+    <script type="text/javascript" src = "assets/js/main.js"></script>
+    <style type="text/css">
+        * {margin:0; padding:0;}
+		
+        body, html {width:100%;}
+		
+        .sidebar{
+        position:absolute;
+        top:0;
+        right:0;
+        width:200px;
+        max-height:87%;
+        z-index:200;
+        background-color:rgba(10,10,10,0.8);
+        color:#fff;
+        padding:20px;
+        overflow-y:scroll;
+        }
+		
+		#selid {
+			position:absolute;
+			right:250px;
+			padding:10px;
+			z-index:10;
+		}
+		
+		.sel_font {
+			float:left;
+			color:white;
+			font-size:25px;
+			font-weight:bold;
+		}
+		
+		.sel_select {
+			float:left;
+			color:black;
+			font-size:25px;
+			
+		}
+    </style>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <!--  <div id="main"></div>   -->
+	    <div id="selid">
+			<div class="sel_font">请选择用户：  </div>
+			
+			<select class="sel_select" id="yonghu" onchange="draw(this.options[this.options.selectedIndex].value)">
+				<option value="all">所有乘客</option>
+				<option value="commuting">通勤</option>
+				<option value="shopping">购物</option>
+				<option value="entertainment">娱乐</option>
+			</select>
+			
+		</div>
+	    <div class="sidebar" id="sidebar" style="color:white;font-family:幼圆;font-size:20px">
+       出发地top5:
+       <table cellspacing="15" style="border-top:solid thin white;color:white;font-family:黑体;font-size:18px">
+         <tr>
+           <th id="o1n" align="left" width="150px"></th>
+           <th id="o1v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="o2n" align="left" width="150px"></th>
+           <th id="o2v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="o3n" align="left" width="150px"></th>
+           <th id="o3v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="o4n" align="left" width="150px"></th>
+           <th id="o4v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="o5n" align="left" width="150px"></th>
+           <th id="o5v" align="right" width="20px"></th>
+         </tr>
+       </table> 
+	   
+       <br><br>
+       目的地top5:
+       <table cellspacing="15" style="border-top:solid thin white;color:white;font-family:黑体;font-size:18px">
+         <tr>
+           <th id="d1n" align="left" width="150px"></th>
+           <th id="d1v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="d2n" align="left" width="150px"></th>
+           <th id="d2v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="d3n" align="left" width="150px"></th>
+           <th id="d3v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="d4n" align="left" width="150px"></th>
+           <th id="d4v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="d5n" align="left" width="150px"></th>
+           <th id="d5v" align="right" width="20px"></th>
+         </tr>
+       </table>
+       <br><br>
+       吞吐量top5:
+       <table cellspacing="15" style="border-top:solid thin white;color:white;font-family:黑体;font-size:18px">
+         <tr>
+           <th id="od1n" align="left" width="150px"></th>
+           <th id="od1v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="od2n" align="left" width="150px"></th>
+           <th id="od2v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="od3n" align="left" width="150px"></th>
+           <th id="od3v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="od4n" align="left" width="150px"></th>
+           <th id="od4v" align="right" width="20px"></th>
+         </tr>
+         <tr>
+           <th id="od5n" align="left" width="150px"></th>
+           <th id="od5v" align="right" width="20px"></th>
+         </tr>
+       </table>
+      </div>
+      <div class="main" id="main">  </div>
+
+    <script type="text/javascript">
+        var maindiv = document.getElementById("main");
+        maindiv.style.height = document.body.clientHeight+"px";
+    </script>
+    <!-- ECharts单文件引入 -->
+    
+</body>
+
+    <script type="text/javascript">
+        
+
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            },
+            packages: [
+                {
+                    name: 'BMap',
+                    location: 'assets/js',
+                    main: 'main'
+                }
+            ]
+        });
+        
+		
+	function draw(val){	
+		
+		var dataroot = "";
+		
+		$.getJSON(dataroot, function(data){
+		
+		
+        // 使用
+        require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/map' // 
+            ],
+		
+		
+		
+        function (echarts, BMapExtension) {
+    // 基于准备好的dom，初始化echarts图表
+        // 初始化地图
+        var mapcon = document.getElementById("main");
+        var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+            enableMapClick: false
+        });
+        var map = BMapExt.getMap();
+        var container = BMapExt.getEchartsContainer();
+		
+		//北京坐标
+        var startPoint = {x:116.403119,y:39.914714};
+		//重庆坐标
+		//var startPoint = {x:106.549116,y:29.566725};
+        var point = new BMap.Point(startPoint.x, startPoint.y);
+        map.centerAndZoom(point, 13);
+        map.enableScrollWheelZoom(true);
+        // 地图自定义样式
+        map.setMapStyle({
+            styleJson: [
+                  {
+                       "featureType": "water",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#044161"
+                       }
+                  },
+                  {
+                       "featureType": "land",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#064f85"
+                       }
+                  },
+                  {
+                       "featureType": "railway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000",
+							"weight":2
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#005b96",
+                            
+                       }
+                  },
+                  {
+                       "featureType": "highway",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry",
+                       "stylers": {
+                            "color": "#000000"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#00508b"
+                       }
+                  },
+                  {
+                       "featureType": "poi",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "green",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#056197",
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "subway",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "on"
+                       }
+                  },
+                  {
+                       "featureType": "manmade",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "local",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "arterial",
+                       "elementType": "labels",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  },
+                  {
+                       "featureType": "boundary",
+                       "elementType": "geometry.fill",
+                       "stylers": {
+                            "color": "#029fd4"
+                       }
+                  },
+                  {
+                       "featureType": "building",
+                       "elementType": "all",
+                       "stylers": {
+                            "color": "#1a5787"
+                       }
+                  },
+                  {
+                       "featureType": "label",
+                       "elementType": "all",
+                       "stylers": {
+                            "visibility": "off"
+                       }
+                  }
+            ]
+        });
+
+            options = 
+                {
+
+                    color: ['gold','aqua','lime'],
+                    title:{
+                        text: '轨迹',
+                        x:'center',
+                        textStyle : {
+                            "color": "#fff",
+                            "fontSize": 50,
+                            "fontFamily": "黑体"
+                        },
+                        subtextStyle : {
+                            "fontSize": 30,
+                            "fontFamily": "楷体"
+                        }
+                    },
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: '{b}'
+                    },
+					legend: {
+                        orient: 'vertical',
+                        x:'left',
+                        data:['按o排序','按d排序','按总量排序'],
+                        selectedMode: 'single',
+                        selected:{
+                            '按d排序' : false,
+                            '按总量排序': false
+                        },
+                        textStyle : {
+                            color: '#fff',
+                            "fontSize": 20
+                        }
+                    },
+                    toolbox: {
+                        show : true,
+                        orient : 'vertical',
+                        x: 'right',
+                        y: 'center',
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    dataRange: {
+                        min : 0,
+                        max : 120,
+                        calculable : true,
+                        x: 100,
+                        y: document.body.clientHeight-250,
+                        color: ['#ff3333', 'orange', 'yellow','lime','aqua'],
+                        textStyle:{
+                            color:'#fff'
+                        }
+                    },
+                    series : [
+                    {
+                        name: '按o排序',
+                        type: 'map',
+                        mapType: 'none',
+                        itemStyle:{
+                            normal:{
+                                borderColor:'rgba(100,149,237,1)',
+                                borderWidth:0.5,
+                                areaStyle:{
+                                    color: '#1b1b1b'
+                                }
+                            }
+                        },
+                        data:[],
+                        markLine : {
+                            smooth:true,
+                            symbol: ['circle', 'circle'],  
+                            symbolSize : 1,
+                            effect : {
+                                show: true,
+                                scaleSize: 1,
+                                period: 30,
+                                color: '#fff',
+                                shadowBlur: 10
+                            },
+                            itemStyle : {
+                                normal: {
+                                    borderWidth:1,
+                                    lineStyle: {
+                                        type: 'solid',
+                                        shadowBlur: 10,
+                                        width: 1
+                                    }
+                                }
+                            },
+                            data : data.markLineData_O,
+                        },
+                        geoCoord: data.geoData_O,
+                        markPoint : {
+                            symbol:'emptyCircle',
+                            symbolSize : 10,
+                            effect : {
+                                show: true,
+                                shadowBlur : 0
+                            },
+                            itemStyle:{
+                                normal:{
+                                    label:{show:false}
+                                },
+                                emphasis: {
+                                    label:{position:'top'}
+                                }
+                            },
+                            
+                            data: data.markPointData_O
+                        }
+                    },
+					{
+                        name: '按d排序',
+                        type: 'map',
+                        mapType: 'none',
+                        itemStyle:{
+                            normal:{
+                                borderColor:'rgba(100,149,237,1)',
+                                borderWidth:0.5,
+                                areaStyle:{
+                                    color: '#1b1b1b'
+                                }
+                            }
+                        },
+                        data:[],
+                        markLine : {
+                            smooth:true,
+                            symbol: ['circle', 'circle'],  
+                            symbolSize : 1,
+                            effect : {
+                                show: true,
+                                scaleSize: 1,
+                                period: 30,
+                                color: '#fff',
+                                shadowBlur: 10
+                            },
+                            itemStyle : {
+                                normal: {
+                                    borderWidth:1,
+                                    lineStyle: {
+                                        type: 'solid',
+                                        shadowBlur: 10,
+                                        width: 1
+                                    }
+                                }
+                            },
+                            data : data.markLineData_D,
+                        },
+                        geoCoord: data.geoData_D,
+                        markPoint : {
+                            symbol:'emptyCircle',
+                            symbolSize : 10,
+                            effect : {
+                                show: true,
+                                shadowBlur : 0
+                            },
+                            itemStyle:{
+                                normal:{
+                                    label:{show:false}
+                                },
+                                emphasis: {
+                                    label:{position:'top'}
+                                }
+                            },
+                            //data : lineso[0].map(function(o){return o[0]})
+                            data: data.markPointData_D
+                        }
+                    },
+					{
+                        name: '按总量排序',
+                        type: 'map',
+                        mapType: 'none',
+                        itemStyle:{
+                            normal:{
+                                borderColor:'rgba(100,149,237,1)',
+                                borderWidth:0.5,
+                                areaStyle:{
+                                    color: '#1b1b1b'
+                                }
+                            }
+                        },
+                        data:[],
+                        markLine : {
+                            smooth:true,
+                            symbol: ['circle', 'circle'],  
+                            symbolSize : 1,
+                            effect : {
+                                show: true,
+                                scaleSize: 1,
+                                period: 30,
+                                color: '#fff',
+                                shadowBlur: 10
+                            },
+                            itemStyle : {
+                                normal: {
+                                    borderWidth:1,
+                                    lineStyle: {
+                                        type: 'solid',
+                                        shadowBlur: 10,
+                                        width: 1
+                                    }
+                                }
+                            },
+                            data : data.markLineData_ALL,
+                        },
+                        geoCoord: data.geoData_ALL,
+                        markPoint : {
+                            symbol:'emptyCircle',
+                            symbolSize : 10,
+                            effect : {
+                                show: true,
+                                shadowBlur : 0
+                            },
+                            itemStyle:{
+                                normal:{
+                                    label:{show:false}
+                                },
+                                emphasis: {
+                                    label:{position:'top'}
+                                }
+                            },
+                            //data : lineso[0].map(function(o){return o[0]})
+                            data: data.markPointData_ALL
+                        }
+                    }
+                ]
+            };
+            
+        
+        var myChart = BMapExt.initECharts(container);
+        BMapExt.setOption(options); 
+        
+		
+    });
+	
+	
+	
+            document.getElementById("o1n").innerText = data.Otop[0].name;
+            document.getElementById("o1v").innerText = data.Otop[0].value;
+            document.getElementById("o2n").innerText = data.Otop[1].name;
+            document.getElementById("o2v").innerText = data.Otop[1].value;
+            document.getElementById("o3n").innerText = data.Otop[2].name;
+            document.getElementById("o3v").innerText = data.Otop[2].value;
+            document.getElementById("o4n").innerText = data.Otop[3].name;
+            document.getElementById("o4v").innerText = data.Otop[3].value;
+            document.getElementById("o5n").innerText = data.Otop[4].name;
+            document.getElementById("o5v").innerText = data.Otop[4].value;
+
+            document.getElementById("d1n").innerText = data.Dtop[0].name;
+            document.getElementById("d1v").innerText = data.Dtop[0].value;
+            document.getElementById("d2n").innerText = data.Dtop[1].name;
+            document.getElementById("d2v").innerText = data.Dtop[1].value;
+            document.getElementById("d3n").innerText = data.Dtop[2].name;
+            document.getElementById("d3v").innerText = data.Dtop[2].value;
+            document.getElementById("d4n").innerText = data.Dtop[3].name;
+            document.getElementById("d4v").innerText = data.Dtop[3].value;
+            document.getElementById("d5n").innerText = data.Dtop[4].name;
+            document.getElementById("d5v").innerText = data.Dtop[4].value;
+
+            document.getElementById("od1n").innerText = data.ALLtop[0].name;
+            document.getElementById("od1v").innerText = data.ALLtop[0].value;
+            document.getElementById("od2n").innerText = data.ALLtop[1].name;
+            document.getElementById("od2v").innerText = data.ALLtop[1].value;
+            document.getElementById("od3n").innerText = data.ALLtop[2].name;
+            document.getElementById("od3v").innerText = data.ALLtop[2].value;
+            document.getElementById("od4n").innerText = data.ALLtop[3].name;
+            document.getElementById("od4v").innerText = data.ALLtop[3].value;
+            document.getElementById("od5n").innerText = data.ALLtop[4].name;
+            document.getElementById("od5v").innerText = data.ALLtop[4].value;
+			
+	});
+	
+	}
+	
+	draw("all");
+		
+		
+		
+		
+			
+    </script>
+</html>

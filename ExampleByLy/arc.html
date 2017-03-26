@@ -1,0 +1,51 @@
+<!-- 这是一个表示站点或区域间流向的弧线图 -->
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	
+	<link rel="stylesheet" type="text/css" href="css/subway.css">
+	
+	<script type="text/javascript" src='js/jquery.min.js'></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/d3.min.js"></script>
+    <script type="text/javascript" src='js/pin.js'></script>
+    <script src="js/topojson.v0.min.js"></script>
+    <script src="js/queue.v1.min.js"></script>
+	
+
+	<style type="text/css">
+	  
+	  #graph2-graph{
+		max-width: 100%;
+	  
+		
+	  }
+			   
+	</style>
+</head>
+<body>
+<div id='graph2'>
+  <div class="container">
+    
+	<div id="title"><h1>北京市热点客流流向图</h1></div>
+	<div class='tip-right'>
+		<div class='title'>
+		</div>
+		<div class='content'></div>
+	</div>
+
+	
+		<div id='graph2-graph'></div></div>
+  </div>
+</div>
+	
+	
+</body>
+
+<script src="json/arc/zones_461.json"></script>
+
+<script src="json/arc/flowtest.json"></script>
+<script type="text/javascript" src='js/arc/graph2.js'></script>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" > 
+<!--上边这句话必须要有啊，要不然document.body.clientHeight就不好使 -->
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>OD_demo_echarts3</title>
+    <!-- 新添加的jQuery -->
+    <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- End -->
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts-all-3.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+	
+</head>
+<body>
+    <div class="main" id="main"></div>
+</body>
+
+<script type="text/javascript">
+	var maindiv = document.getElementById("main");
+    maindiv.style.height = document.body.clientHeight+"px";
+	/*
+	*
+	* 引入地图出现了问题
+	*
+	*/
+	var myChart = echarts.init(document.getElementById('main'));
+	var app = {};
+	var option = {
+		animation: false,
+		bmap: {
+            center: [116.46, 39.92],
+            zoom: 10,
+            roam: true,   
+        }
+	};
+	if (!app.inNode) {
+        // 添加百度地图插件
+        var bmap = myChart.getModel().getComponent('bmap').getBMap();
+        bmap.addControl(new BMap.MapTypeControl());
+    }
+	myChart.setOption(option);
+</script>
+
+</html>

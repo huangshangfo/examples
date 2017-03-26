@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="stylesheet" href="css/leaflet.css"/>
+  <!-- <link rel="stylesheet" href="//cdn.amazeui.org/amazeui/2.7.0/css/amazeui.min.css" />-->
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <!--    <script src="//cdn.amazeui.org/amazeui/2.7.0/js/amazeui.min.js"></script>-->
+  <script
+        src="js/leaflet.js">
+    </script>
+  
+</head>
+<body>
+
+
+<div >
+  <div id="map" style="height: 1080px;width: 1920px">8</div>
+</div>
+
+<script>
+
+  var map = L.map('map', {
+    zoomControl: false,
+    center: [39.85, 116.4],
+    zoom: 12
+  });
+  L.circle([39.85, 116.4], 12000, {
+    color: 'red',//颜色
+    fillColor: '#f03',
+    fillOpacity:0,//透明度
+    dashArray: '5'  //设置虚线
+  }).addTo(map);
+  L.tileLayer('http://webrd0{s}.is.autonavi.com/appmaptile?' +
+    'lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+    {subdomains: ["1", "2", "3", "4"]}).addTo(map);
+</script>
+</body>
+</html>﻿

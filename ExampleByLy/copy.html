@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>map_layout</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=t65FFKL6S3wBE51a06KGMyEm"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/jquery.bootstrap-autohidingnavbar.min.js"></script>
+    <script type="text/javascript" src = "assets/data/odmax_zfo.json"></script>
+    <script type="text/javascript" src = "assets/data/odmax_zfd.json"></script>
+    <script type="text/javascript" src = "assets/data/odmaxs.json"></script>
+    <script type="text/javascript" src = "assets/data/odmaxsps.json"></script>
+    <script type="text/javascript" src = "assets/data/zones.json"></script>
+    <script src="assets/js/echarts.js"></script>
+    <script type="text/javascript" src = "assets/js/main.js"></script>
+    <script type="text/javascript" src = "assets/data/od_demo_timeline.json"></script>
+
+
+    <style type="text/css">
+        .mainContent {
+            /*background-color: rgb(200,0,0);*/
+            width:100%;
+            height:1100px;
+        }
+
+        #left {
+            /*background-color: rgb(0,200,0);*/
+            float:left;
+            height:100%;
+            width:70%;
+            padding:10px;
+            margin-left:5px;
+            margin-right:10px;
+        }
+
+        #map {
+            /*background-color: rgb(0,200,0);*/
+            float:left;
+            height:800px;
+            width:100%;
+            padding:5px;
+            margin:5px;
+        }
+
+        #fig3 {
+            /*background-color: rgb(0,200,70);*/
+            float:left;
+            height:200px;
+            width:100%;
+            padding:5px;
+            margin:5px;
+        }
+
+        #right {
+            /*background-color: rgb(0,0,200);*/
+            float:left;
+            height:100%;
+            width:25%;
+            padding:5px;
+        }
+
+        #sel {
+            /*background-color: rgb(0,200,200);*/
+            height:10%;
+            width:100%;
+            padding:15px;
+            padding-top:30px;
+
+            margin-bottom:5px;
+        }
+
+        #fig1 {
+            /*background-color: rgb(200,0,200);*/
+            height:42%;
+            width:100%;
+            padding:10px;
+            margin-bottom:5px;
+        }
+
+        #fig2 {
+            /*background-color: rgb(0,200,200);*/
+            height:42%;
+            width:100%;
+            padding:10px;
+        }
+
+        svg{
+            position:relative;
+        }
+
+        #sel_font {
+            float:left;
+            color:black;
+            font-size:20px;
+        }
+
+        #sel_select {
+            float:left;
+            color:black;
+            font-size:20px;
+
+        }
+
+        path {
+            stroke: #fff;
+            stroke-width: .5px;
+        }
+
+        path:hover {
+            fill-opacity: 0.8;
+        }
+
+        h1 {color:white;}
+        h2 {color:white;}
+
+    </style>
+</head>
+<body>
+<div class="mainContent">
+    <div id="left">
+        <div id="map"></div>
+        <div id="fig3"></div>
+    </div>
+
+    <div id="right">
+        <div id="sel">
+            <p id="sel_font">请选择日期：  </p>
+            <p>
+                <select id="date" name="">
+                    <!--<option value="volvo">2015年5月1日</option>-->
+                    <!--<option value="saab">2015年5月2日</option>-->
+                    <!--<option value="opel">2015年5月3日</option>-->
+                    <!--<option value="audi">2015年5月4日</option>-->
+                </select>
+            </p>
+        </div>
+        <div id="fig1"></div>
+        <div id="fig2"></div>
+    </div>
+</div>
+</body>
+
+
+<script type="text/javascript">
+var date=["2015年5月1日","2015年5月2日","2015年5月3日","2015年5月4日","2015年5月5日","2015年5月6日","2015年5月7日",
+    "2015年5月8日","2015年5月9日","2015年5月10日","2015年5月11日","2015年5月12日","2015年5月13日","2015年5月14日"];
+var odData = [
+        ["王府井路口北",120],
+        ["台基厂路口西",24],
+        ["天安门东",79],
+        ["正义路南口",89],
+        ["正义路",170],
+        ["王府井",390],
+        ["台基厂路口东",14],
+        ["南河沿",46]
+        ];
+var odDataSort=odData.sort()
+var sel = document.getElementById("date");
+for(var i=0;i<date.length;i++){
+    var option = new Option(date[i], "");
+    sel.options.add(option);
+}
+(function(){
+var datearr = [];
+for (var i=0;i < 24; i++){
+    if(i<10){
+        datearr.push("2015-04-20 0"+i+":00:00");
+        datearr.push("2015-04-20 0"+i+":30:00");
+    }else{
+        datearr.push("2015-04-20 "+i+":00:00");
+        datearr.push("2015-04-20 "+i+":30:00");
+    }
+
+}
+    // 路径配置
+    require.config({
+        paths: {
+            echarts: 'http://echarts.baidu.com/build/dist'
+        },
+        packages: [
+            {
+                name: 'BMap',
+                location: 'assets/js',
+                main: 'main'
+            }
+        ]
+    });
+
+    // 使用
+    require(
+            [
+                'echarts',
+                'BMap',
+                'echarts/chart/map',
+                'echarts/chart/line',
+                'echarts/chart/bar'
+            ],
+
+            function (echarts, BMapExtension) {
+                // 基于准备好的dom，初始化echarts图表
+                // 初始化地图
+                var mapcon = document.getElementById("map");
+                var BMapExt = new BMapExtension(mapcon, BMap, echarts,{
+                    enableMapClick: false
+                });
+                var map = BMapExt.getMap();
+                var container = BMapExt.getEchartsContainer();
+
+                var startPoint = {x:116.404323,y:39.907566};
+                var point = new BMap.Point(startPoint.x, startPoint.y);
+                map.centerAndZoom(point, 11);
+                map.enableScrollWheelZoom(true);
+                // 地图自定义样式
+                map.setMapStyle({
+                    styleJson: [
+                        {
+                            "featureType": "water",
+                            "elementType": "all",
+                            "stylers": {
+                                "color": "#044161"
+                            }
+                        },
+                        {
+                            "featureType": "land",
+                            "elementType": "all",
+                            "stylers": {
+                                "color": "#000000"
+                            }
+                        },
+                        {
+                            "featureType": "boundary",
+                            "elementType": "geometry",
+                            "stylers": {
+                                "color": "#064f85"
+                            }
+                        },
+                        {
+                            "featureType": "railway",
+                            "elementType": "all",
+                            "stylers": {
+                                "visibility": "off"
+                            }
+                        },
+                        {
+                            "featureType": "highway",
+                            "elementType": "geometry",
+                            "stylers": {
+                                "color": "#000000"
+                            }
+                        },
+                        {
+                            "featureType": "highway",
+                            "elementType": "geometry.fill",
+                            "stylers": {
+                                "color": "#005b96",
+                                "lightness": 1
+                            }
+                        },
+                        {
+                            "featureType": "highway",
+                            "elementType": "labels",
+                            "stylers": {
+                                "visibility": "off"
+                            }
+                        },
+                        {
+                            "featureType": "arterial",
+                            "elementType": "geometry",
+                            "stylers": {
+                                "color": "#000000"
+                            }
+                        },
+                        {
+                            "featureType": "arterial",
+                            "elementType": "geometry.fill",
+                            "stylers": {
+                                "color": "#00508b"
+                            }
+                        },
+                        {
+                            "featureType": "poi",
+                            "elementType": "all",
+                            "stylers": {
+                                "visibility": "on"
+                            }
+                        },
+                        {
+                            "featureType": "green",
+                            "elementType": "all",
+                            "stylers": {
+                                "color": "#056197",
+                                "visibility": "off"
+                            }
+                        },
+                        {
+                            "featureType": "subway",
+                            "elementType": "all",
+                            "stylers": {
+                                "visibility": "on"
+                            }
+                        },
+                        {
+                            "featureType": "manmade",
+                            "elementType": "all",
+                            "stylers": {
+                                "visibility": "off"
+                            }
+                        },
+                        {
+                            "featureType": "local",
+                            "elementType": "all",
+                            "stylers": {
+                                "visibility": "off"
+                            }
+                        },
+                        {
+                            "featureType": "arterial",
+                            "elementType": "labels",
+                            "stylers": {
+                                "visibility": "off"
+                            }
+                        },
+                        {
+                            "featureType": "boundary",
+                            "elementType": "geometry.fill",
+                            "stylers": {
+                                "color": "#029fd4"
+                            }
+                        },
+                        {
+                            "featureType": "building",
+                            "elementType": "all",
+                            "stylers": {
+                                "color": "#1a5787"
+                            }
+                        },
+                        {
+                            "featureType": "label",
+                            "elementType": "all",
+                            "stylers": {
+                                "visibility": "on"
+                            }
+                        }
+                    ]
+                });
+
+                option = {
+                    timeline:{
+                        data:datearr,
+                        label : {
+                            formatter : function(s) {
+                                return s.slice(11, 16);
+                            },
+                            textStyle : {
+                                color: '#fff'
+                            }
+                        },
+                        autoPlay : true,
+                        playInterval : 5000
+                    },
+
+                    options :[
+                        {
+
+                            color: ['gold','aqua','lime'],
+                            title:{
+                                text: 'OD展示模板',
+                                x:'center',
+                                textStyle : {
+                                    "color": "#fff",
+                                    "fontSize": 50,
+                                    "fontFamily": "黑体"
+                                },
+                                subtextStyle : {
+                                    "fontSize": 30,
+                                    "fontFamily": "楷体"
+                                }
+                            },
+                            tooltip : {
+                                trigger: 'item',
+                                formatter: '{b}'
+                            },
+                            toolbox: {
+                                show : true,
+                                orient : 'vertical',
+                                x: 'right',
+                                y: 'center',
+                                feature : {
+                                    mark : {show: true},
+                                    dataView : {show: true, readOnly: false},
+                                    restore : {show: true},
+                                    saveAsImage : {show: true}
+                                }
+                            },
+                            dataRange: {
+                                min : 0,
+                                max : 120,
+                                calculable : true,
+                                x: 100,
+                                y: document.body.clientHeight-250,
+                                color: ['#ff3333', 'orange', 'yellow','lime','aqua'],
+                                textStyle:{
+                                    color:'#fff'
+                                }
+                            },
+                            series : [
+                                {
+                                    name: '按o排序',
+                                    type: 'map',
+                                    mapType: 'none',
+                                    itemStyle:{
+                                        normal:{
+                                            borderColor:'rgba(100,149,237,1)',
+                                            borderWidth:0.5,
+                                            areaStyle:{
+                                                color: '#1b1b1b'
+                                            }
+                                        }
+                                    },
+                                    data:[],
+                                    markLine : {
+                                        smooth:true,
+                                        symbol: ['circle', 'circle'],
+                                        symbolSize : 1,
+                                        effect : {
+                                            show: true,
+                                            scaleSize: 1,
+                                            period: 30,
+                                            color: '#fff',
+                                            shadowBlur: 10
+                                        },
+                                        itemStyle : {
+                                            normal: {
+                                                borderWidth:1,
+                                                lineStyle: {
+                                                    type: 'solid',
+                                                    shadowBlur: 10,
+                                                    width: 1
+                                                }
+                                            }
+                                        },
+                                        data : markLineData[0],
+                                    },
+                                    geoCoord: geoData,
+                                    markPoint : {
+                                        symbol:'emptyCircle',
+                                        symbolSize : 10,
+                                        effect : {
+                                            show: true,
+                                            shadowBlur : 0
+                                        },
+                                        itemStyle:{
+                                            normal:{
+                                                label:{show:false}
+                                            },
+                                            emphasis: {
+                                                label:{position:'top'}
+                                            }
+                                        },
+                                        data: markPointData[0]
+                                    }
+                                }
+                            ]
+                        }]
+                };
+                for(var i = 1; i < 3; i++){
+                    option.options.push(
+                            {series:[
+                                {
+                                    markLine:{data:markLineData[i]},
+                                    markPoint:{data:markPointData[i]}
+                                }
+                            ]}
+                    );
+                }
+
+                var myChart = BMapExt.initECharts(container);
+                BMapExt.setOption(option);
+
+                var myChart1 = echarts.init(document.getElementById('fig1')); //条形图
+                var myChart2 = echarts.init(document.getElementById('fig3'));//堆积折线图
+                var myChart3 = echarts.init(document.getElementById('fig2')); //条形图
+
+
+                    var baroption = {
+                        title: {
+                            text: '各小区出行量'
+                        },
+                        tooltip: {
+                            trigger: 'axis'
+                        },
+                        toolbox: {
+                            feature: {
+                                dataView: {show: true, readOnly: false},
+                                magicType: {show: true, type: ['line', 'bar']},
+                                restore: {show: true},
+                                saveAsImage: {show: true}
+                            }
+                        },
+                        xAxis : [
+                            {
+                                type : 'category',
+                                splitLine:{
+                                    show:false
+                                },
+                                data : ['王府井路口北','台基厂路口西','天安门东','正义路南口','正义路','王府井','台基厂路口东','南河沿'],
+                                axisLabel:{
+                                    textStyle:{color:'black'},
+                                    rotate:30
+                                }
+                            }
+                        ],
+                        yAxis: [
+                            {
+                                type: 'value',
+                                name: '出发量',
+                                min: 0,
+                                max: 250,
+                                interval: 50,
+                                axisLabel: {
+                                    formatter: '{value} 人'
+                                }
+                            }
+                        ],
+                        series: [
+                            {
+                                name:'出发量',
+                                type:'bar',
+                                data:[20, 49, 70, 232, 25, 76, 135, 162, 26, 200, 64, 33]
+                            }
+                        ]
+                    };
+                    var footoption = {
+                        title: {
+                            text: 'XX小区出行量'
+                        },
+                        tooltip: {
+                            trigger: 'axis'
+                        },
+                        legend: {
+                            data:['5月1日','5月2日','5月3日','5月4日','5月5日','5月6日','5月7日','5月8日','5月9日','5月10日',
+                                '5月11日','5月12日','5月13日','5月14日']
+                        },
+                        toolbox: {
+                            show: true,
+                            feature: {
+                                dataZoom: {},
+                                dataView: {readOnly: false},
+                                magicType: {type: ['line', 'bar']},
+                                restore: {},
+                                saveAsImage: {}
+                            }
+                        },
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: ['0:00','1:00','2:00','3:00','4:00','5:00','6:00','7:00','8:00','9:00','10:00',
+                                '11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00',
+                                '22:00','23:00']
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [
+                            {
+                                name:'5月1日',
+                                type:'line',
+                                stack: '总量',
+
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月2日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月3日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月4日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月5日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月6日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月1日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月7日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月8日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月9日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月10日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月11日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月12日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月13日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            },
+                            {
+                                name:'5月14日',
+                                type:'line',
+                                stack: '总量',
+                                data:initPeople()
+                            }
+                        ]
+                    };
+
+                    var rightoption = {
+                        title: {
+                            text: '各小区里程和时间统计'
+                        },
+                        tooltip: {
+                            trigger: 'axis'
+                        },
+                        toolbox: {
+                            feature: {
+                                dataView: {show: true, readOnly: false},
+                                magicType: {show: true, type: ['line', 'bar']},
+                                restore: {show: true},
+                                saveAsImage: {show: true}
+                            }
+                        },
+                        legend: {
+                            data:['里程','时间']
+                        },
+                        xAxis : [
+                            {
+                                type : 'category',
+                                splitLine:{
+                                    show:false
+                                },
+                                data : ['王府井路口北','台基厂路口西','天安门东','正义路南口','正义路','王府井','台基厂路口东','南河沿'],
+                                axisLabel:{
+                                    textStyle:{color:'black'},
+                                    rotate:30
+
+                                }
+                            }
+                        ],
+                        yAxis: [
+                            {
+                                type: 'value',
+                                name: '里程',
+                                min: 0,
+                                max: 250,
+                                interval: 50,
+                                axisLabel: {
+                                    formatter: '{value} km'
+                                }
+                            },
+                            {
+                                type: 'value',
+                                name: '时间',
+                                min: 0,
+                                max: 20,
+                                interval: 4,
+                                axisLabel: {
+                                    formatter: '{value} h'
+                                }
+                            }
+                        ],
+                        series: [
+                            {
+                                name:'里程',
+                                type:'bar',
+                                data:[240.0, 140.9, 170.0, 203.2, 205.6, 76.7, 135.6, 162.2]
+                            },
+                            {
+                                name:'时间',
+                                type:'bar',
+                                yAxisIndex: 1,
+                                data:[7.6, 5.9, 9.0, 6.4, 8.7, 10.7, 15.6, 12.2]
+                            }
+                        ]
+                    };
+                    myChart1.setOption(baroption);
+                    myChart2.setOption(footoption);
+                    myChart3.setOption(rightoption);
+
+            });
+}
+        )();
+
+function initPeople(){
+    var peopleList = [];
+    for (var i=0;i<24;i++)
+    {
+        peopleList.push(parseInt(Math.random()*3000));
+    }
+    return peopleList;
+}
+
+</script>
+
+
+</html>
