@@ -1,8 +1,4 @@
-/*基础数据*/
-var vehicle_num = [9912, 9444, 9109, 9612];
-var record_num = [60073, 65131, 73459, 87382];
-var contract_num = [54717, 59744, 66899, 78717];
-
+/*************显示基础数据**************/
 $(function() {
 	// Set up the chart
 	var chart = new Highcharts.Chart({
@@ -82,33 +78,9 @@ $('.form_datetime').datetimepicker({
 	language: 'zh-CN'
 });
 
-//显示南丁尔图
+/*************显示南丁尔图**************/
 var mainEl = document.getElementById('gps-pie');
 var chart = echarts.init(mainEl);
-var colorList = [
-	'#c23531', '#2f4554', '#61a0a8'
-];
-
-var data8 = [
-	{ value: 666, name: '分时租赁' },
-	{ value: 780, name: '短租' },
-	{ value: 987, name: '长租' }
-]
-var data9 = [
-	{ value: 506, name: '分时租赁' },
-	{ value: 570, name: '短租' },
-	{ value: 984, name: '长租' }
-]
-var data10 = [
-	{ value: 692, name: '分时租赁' },
-	{ value: 571, name: '短租' },
-	{ value: 1339, name: '长租' }
-]
-var data11 = [
-	{ value: 529, name: '分时租赁' },
-	{ value: 500, name: '短租' },
-	{ value: 1289, name: '长租' }
-]
 
 function copy(originData) {
 	var copy = [];
@@ -129,8 +101,8 @@ echarts.util.each(data, function(item, index) {
 });
 optionGPS = {
 	title: {
-		text: 'GPS数据',
-		subtext: '各类型租赁车上传GPS量',
+		text: '上传GPS车辆数',
+		subtext: '各租赁类型上传GPS的车辆数',
 		x: 'center'
 	},
 	tooltip: {
@@ -150,24 +122,7 @@ optionGPS = {
 		show: true,
 		feature: {
 			mark: { show: true },
-			myTool2: {
-				show: true,
-				title: '还原',
-				icon: 'image://img/restore.png',
-				onclick: function() {
-					data = getData();
-					echarts.util.each(data, function(item, index) {
-						item.itemStyle = {
-							normal: { color: colorList[index] }
-						};
-						legendData.push(item.name);
-					});
-					chart.setOption({
-						legend: { data: legendData },
-						series: [{ data: data }]
-					});
-				}
-			},
+			restore: { show: true },
 			magicType: {
 				show: true,
 				type: ['pie', 'funnel']
@@ -177,7 +132,7 @@ optionGPS = {
 	},
 	calculable: true,
 	series: [{
-			name: 'GPS数据量',
+			name: '车辆数',
 			type: 'pie',
 			center: ['65%', '50%'],
 			radius: [20, 110],
@@ -207,7 +162,20 @@ optionGPS = {
 	]
 };
 chart.setOption(optionGPS);
-
+//自定义还原事件
+chart.on("restore", function(params) {
+	data = getData();
+	echarts.util.each(data, function(item, index) {
+		item.itemStyle = {
+			normal: { color: colorList[index] }
+		};
+		legendData.push(item.name);
+	});
+	chart.setOption({
+		legend: { data: legendData },
+		series: [{ data: data }]
+	});
+})
 //根据月份获取数据
 function getData() {
 	var nowData;
@@ -322,85 +290,201 @@ function getHoveredDataIndex(params) {
 }
 window.onresize = chart.resize;
 
+/*************GPS数据随时间变化曲线**************/
 var dom = document.getElementById('timeline-data');
 var myChart = echarts.init(dom);
 
 optionChange = null;
-var base = +new Date(2014, 9, 3);
+var base = +new Date(2016, 7, 1);
 var oneDay = 24 * 3600 * 1000;
 var date = [];
 
-var testData = [Math.random() * 150];
-var now = new Date(base);
+//json文件中的数据
+var all_date = [];
+var all_fenshiData = [];
+var all_duanzuData = [];
+var all_changzuData = [];
 
+gpsNum.forEach(function(s) {
+	all_date.push(s.date);
+	all_fenshiData.push(s.fenshi);
+	all_duanzuData.push(s.duanzu);
+	all_changzuData.push(s.changzu);
+});
+var maxLen = all_date.length;
+
+var count = 0;
+var fenshiData = [all_fenshiData[count]]; //分时租赁
+var duanzuData = [all_duanzuData[count]]; //短租
+var changzuData = [all_changzuData[count]]; //长租
+var now = all_date[count];
+
+//数组添加数据
 function addData(shift) {
-    now = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/');
-    date.push(now);
-    testData.push((Math.random() - 0.4) * 10 + testData[testData.length - 1]);
+	date.push(now);
+	if(count < maxLen)
+		count++;
 
-    if (shift) {
-        date.shift();
-        testData.shift();
-    }
-
-    now = new Date(+new Date(now) + oneDay);
+	fenshiData.push(all_fenshiData[count]);
+	duanzuData.push(all_duanzuData[count]);
+	changzuData.push(all_changzuData[count]);
+	if(shift) {
+		date.shift();
+		fenshiData.shift();
+		duanzuData.shift();
+		changzuData.shift();
+	}
+	now = all_date[count];
 }
 
-for (var i = 1; i < 30; i++) {
-    addData();
+//日期跨度
+for(var i = 1; i < 15; i++) {
+	addData();
 }
 
+var pause=0;
+var titles=['暂停','开始'];
+var images=['image://img/pause.ico','image://img/start.ico'];
+var timer;
 optionChange = {
 	title: {
 		text: 'GPS数据随时间变化曲线',
+		subtext: '各租赁类型车每天上传的GPS量',
 		x: 'center'
 	},
-    tooltip: {
-        show: true,
-        trigger: 'axis'
-    },
-    toolbox:{
-    	show: true,
-    	feature: {
-    		saveAsImage: { show: true }
-    	}
-    },
-    xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: date
-    },
-    yAxis: {
-        boundaryGap: [0, '50%'],
-        scale: true,
-        type: 'value'
-    },
-    series: [
-        {
-            name:'测试',
-            type:'line',
-            smooth:false,
-            symbol: 'none',
-            stack: null,
-            data: testData
-        }
-    ]
+	tooltip: {
+		trigger: 'axis'
+	},
+	legend: {
+		data: ['分时租赁', '短租', '长租'],
+		left: '10%',
+		top: '5%'
+	},
+	toolbox: {
+		show: true,
+		feature: {
+			magicType: { show: true, type: ['stack', 'tiled'] },
+			myPause: {
+				show: true,
+				title: titles[0],
+				icon: images[0],
+				onclick: function(){
+					pause=(pause==0)?1:0;
+					myChart.setOption({
+						toolbox:{
+							feature:{
+								myPause:{
+									title: titles[pause],
+									icon: images[pause]
+								}
+							}
+						}
+					});
+					if(pause==1)
+						clearInterval(timer); //清除定时器
+					else
+						timer=setInterval(loadData, 1000);
+				}
+			},
+			restore: { show: true },
+			saveAsImage: { show: true }
+		},
+		right: '10%'
+	},
+	xAxis: {
+		type: 'category',
+		boundaryGap: false,
+		data: date
+	},
+	yAxis: {
+		boundaryGap: [0, '50%'],
+		scale: true,
+		type: 'value'
+	},
+	series: [{
+			name: '分时租赁',
+			type: 'line',
+			smooth: false,
+			stack: null,
+			data: fenshiData
+		},
+		{
+			name: '短租',
+			type: 'line',
+			smooth: false,
+			stack: null,
+			data: duanzuData
+		},
+		{
+			name: '长租',
+			type: 'line',
+			smooth: false,
+			stack: null,
+			data: changzuData
+		},
+	]
 };
+//加载数据
+function loadData() {
+	if(count < maxLen)
+		addData(true);
+	else {
+		//清空数据
+		count = 0;
+		date.splice(0, date.length);
+		fenshiData.splice(0, fenshiData.length);
+		duanzuData.splice(0, duanzuData.length);
+		changzuData.splice(0, changzuData.length);
 
-setInterval(function () {
-    addData(true);
-    myChart.setOption({
-        xAxis: {
-            data: date
-        },
-        series: [{
-            name:'成交',
-            data: testData
-        }]
-    });
-}, 1000);;
-if (optionChange && typeof optionChange === "object") {
-    myChart.setOption(optionChange, true);
+		for(var i = 1; i < 15; i++) {
+			addData();
+		}
+	}
+
+	myChart.setOption({
+		xAxis: {
+			data: date
+		},
+		series: [{
+				name: '分时租赁',
+				data: fenshiData
+			},
+			{
+				name: '短租',
+				data: duanzuData
+			},
+			{
+				name: '长租',
+				data: changzuData
+			},
+		]
+	});
 }
+/*var pause=false;
 
+myChart.on('click',function(){
+	pause=!pause;
+	if(pause)
+		clearInterval(timer); //清除定时器
+	else
+		timer=setInterval(loadData, 1000);
+});*/
+timer=setInterval(loadData, 1000); //定时加载
+
+if(optionChange && typeof optionChange === "object") {
+	myChart.setOption(optionChange, true);
+}
+//自定义还原事件
+myChart.on('restore', function(params) {
+	//清空数据
+	count = 0;
+	date.splice(0, date.length);
+	fenshiData.splice(0, fenshiData.length);
+	duanzuData.splice(0, duanzuData.length);
+	changzuData.splice(0, changzuData.length);
+
+	for(var i = 1; i < 15; i++) {
+		addData();
+	}
+});
 window.onresize = myChart.resize;
