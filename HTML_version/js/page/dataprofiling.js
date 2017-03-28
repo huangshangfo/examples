@@ -1,5 +1,24 @@
 /*************显示基础数据**************/
 $(function() {
+	//用于显示数据变化
+	var seridx = {
+		'车辆数': 0,
+		'合同数': 1,
+		'备案数': 2
+	};
+	var changeVal = [];
+	var veChangeVal = [0];
+	var conChangeVal = [0];
+	var recChangeVal = [0];
+	for(var i = 1; i < vehicle_num.length; i++) {
+		veChangeVal.push(vehicle_num[i] - vehicle_num[i - 1]);
+		conChangeVal.push(contract_num[i] - contract_num[i - 1]);
+		recChangeVal.push(record_num[i] - record_num[i - 1]);
+	}
+	changeVal.push(veChangeVal);
+	changeVal.push(conChangeVal);
+	changeVal.push(recChangeVal);
+
 	// Set up the chart
 	var chart = new Highcharts.Chart({
 		chart: {
@@ -32,11 +51,26 @@ $(function() {
 		},
 		tooltip: {
 			headerFormat: '<b>{point.key}</b><br>',
-			pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: {point.y}'
+			pointFormat: '<span style="color:{series.color}">\u25CF</span>{series.name}: {point.y}'
 		},
 		plotOptions: {
 			column: {
-				depth: 40
+				depth: 40,
+				//显示上升下降图标
+				dataLabels: {
+					enabled: true,
+					useHTML: true,
+					formatter: function(e) {
+						var index = this.point.x;
+						var seriesIdx = seridx[this.series.name];
+						var col = this.series.color;
+						//console.log(changeVal[seriesIdx][index]);
+						if(changeVal[seriesIdx][index] > 0)
+							return('<span style="color:green"><span class="glyphicon glyphicon-arrow-up"></span></span>');
+						else if(changeVal[seriesIdx][index] < 0)
+							return('<span style="color:red"><span class="glyphicon glyphicon-arrow-down"></span></span>');
+					}
+				}
 			}
 		},
 		series: [{
@@ -342,9 +376,9 @@ for(var i = 1; i < 15; i++) {
 	addData();
 }
 
-var pause=0;
-var titles=['暂停','开始'];
-var images=['image://img/pause.ico','image://img/start.ico'];
+var pause = 0;
+var titles = ['暂停', '开始'];
+var images = ['image://img/pause.ico', 'image://img/start.ico'];
 var timer;
 optionChange = {
 	title: {
@@ -368,22 +402,22 @@ optionChange = {
 				show: true,
 				title: titles[0],
 				icon: images[0],
-				onclick: function(){
-					pause=(pause==0)?1:0;
+				onclick: function() {
+					pause = (pause == 0) ? 1 : 0;
 					myChart.setOption({
-						toolbox:{
-							feature:{
-								myPause:{
+						toolbox: {
+							feature: {
+								myPause: {
 									title: titles[pause],
 									icon: images[pause]
 								}
 							}
 						}
 					});
-					if(pause==1)
+					if(pause == 1)
 						clearInterval(timer); //清除定时器
 					else
-						timer=setInterval(loadData, 1000);
+						timer = setInterval(loadData, 1000);
 				}
 			},
 			restore: { show: true },
@@ -404,6 +438,7 @@ optionChange = {
 	series: [{
 			name: '分时租赁',
 			type: 'line',
+			symbol: 'none',
 			smooth: false,
 			stack: null,
 			data: fenshiData
@@ -411,6 +446,7 @@ optionChange = {
 		{
 			name: '短租',
 			type: 'line',
+			symbol: 'none',
 			smooth: false,
 			stack: null,
 			data: duanzuData
@@ -418,6 +454,7 @@ optionChange = {
 		{
 			name: '长租',
 			type: 'line',
+			symbol: 'none',
 			smooth: false,
 			stack: null,
 			data: changzuData
@@ -469,7 +506,7 @@ myChart.on('click',function(){
 	else
 		timer=setInterval(loadData, 1000);
 });*/
-timer=setInterval(loadData, 1000); //定时加载
+timer = setInterval(loadData, 1000); //定时加载
 
 if(optionChange && typeof optionChange === "object") {
 	myChart.setOption(optionChange, true);

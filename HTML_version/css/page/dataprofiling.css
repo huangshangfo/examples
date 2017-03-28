@@ -24,7 +24,8 @@
 	text-align: center;
 }
 
-#sliders{
+#sliders table{
+	color:lightskyblue;
 	height: 30px;
 }
 #base-container{
