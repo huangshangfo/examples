@@ -322,7 +322,7 @@ function getHoveredDataIndex(params) {
 		params.componentSubType === 'pie' &&
 		params.dataIndex;
 }
-window.onresize = chart.resize;
+
 
 /*************GPS数据随时间变化曲线**************/
 var dom = document.getElementById('timeline-data');
@@ -383,7 +383,7 @@ var timer;
 optionChange = {
 	title: {
 		text: 'GPS数据随时间变化曲线',
-		subtext: '各租赁类型车每天上传的GPS量',
+		subtext: '各租赁类型车每天上传的GPS总量',
 		x: 'center'
 	},
 	tooltip: {
@@ -497,15 +497,7 @@ function loadData() {
 		]
 	});
 }
-/*var pause=false;
 
-myChart.on('click',function(){
-	pause=!pause;
-	if(pause)
-		clearInterval(timer); //清除定时器
-	else
-		timer=setInterval(loadData, 1000);
-});*/
 timer = setInterval(loadData, 1000); //定时加载
 
 if(optionChange && typeof optionChange === "object") {
@@ -524,4 +516,8 @@ myChart.on('restore', function(params) {
 		addData();
 	}
 });
-window.onresize = myChart.resize;
+
+window.onresize = function(){
+	chart.resize();
+	myChart.resize();
+}
