@@ -1,4 +1,10 @@
 /******租赁时长********/
+#myCarousel{
+	top:5px
+}
+#myCarousel2{
+	top:5px
+}
 .carousel-inner{
 	height: 350px;
 	width: 600px;
@@ -12,6 +18,16 @@
 	width: inherit;
 }
 #rtl-fenshi{
+	height: inherit;
+	width: inherit;
+}
+
+/******使用强度********/
+#useIntensity-weekday {
+	height: inherit;
+	width: inherit;
+}
+#useIntensity-weekend {
 	height: inherit;
 	width: inherit;
 }
