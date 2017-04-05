@@ -268,6 +268,16 @@ useIntensityPieOption = {
 			type: 'pie',
 			radius: ['10%','30%'],
 			center: ['30%', '60%'],
+			markPoint:{
+				symbol:'image://img/changzu.png',
+				symbolSize:30,
+				silent:true,
+				data:[{
+					value:1,
+					x:'30%',
+					y:'60%',
+				}]
+			},
 			label: {
 				normal: {
 					show: false,
@@ -291,6 +301,16 @@ useIntensityPieOption = {
 			type: 'pie',
 			radius: ['10%','30%'],
 			center: ['50%', '35%'],
+			markPoint:{
+				symbol:'image://img/duanzu.png',
+				symbolSize:30,
+				silent:true,
+				data:[{
+					value:1,
+					x:'50%',
+					y:'35%'
+				}]
+			},
 			label: {
 				normal: {
 					show: false,
@@ -314,6 +334,16 @@ useIntensityPieOption = {
 			type: 'pie',
 			radius: ['10%','30%'],
 			center: ['70%', '60%'],
+			markPoint:{
+				symbol:'image://img/fenshi.png',
+				symbolSize:30,
+				silent:true,
+				data:[{
+					value:1,
+					x:'70%',
+					y:'60%'
+				}],
+			},
 			label: {
 				normal: {
 					show: false,
