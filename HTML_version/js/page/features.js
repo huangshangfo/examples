@@ -5,7 +5,8 @@ rtlOption = {
 		x: 'center'
 	},
 	tooltip: {
-		trigger: 'axis'
+		trigger: 'axis',
+		formatter: '租赁时长：{b}<br/>{a0} : {c0}<br/>{a1} : {c1}%'
 	},
 	toolbox: {
 		feature: {
@@ -19,7 +20,7 @@ rtlOption = {
 	},
 	legend: {
 		data: ['累计占比', '合同数'],
-		x: '10%',
+		x: 'left',
 		y: 10
 	},
 	xAxis: [{
@@ -116,7 +117,7 @@ var rtlFenShiChart = echarts.init(document.getElementById('rtl-fenshi'));
 rtlFenShiChart.setOption(rtlOption);
 rtlFenShiChart.setOption({
 	title: {
-		subtext: '短租类型车辆租赁时长统计图',
+		subtext: '分时类型车辆租赁时长统计图',
 	},
 	xAxis: [{
 		data: fenshiXAis
@@ -140,7 +141,8 @@ useIntensityBarOption = {
 		trigger: 'axis',
 		axisPointer: {
 			type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-		}
+		},
+		formatter: '日出行次数：{b}<br/>{a0} : {c0}<br/>{a1} : {c1}<br/>{a2} : {c2}'
 	},
 	toolbox: {
 		feature: {
@@ -190,17 +192,37 @@ useIntensityBarOption = {
 	series: [{
 		name: '长租',
 		type: 'bar',
+		itemStyle: {
+			normal: {
+				shadowColor: 'rgba(0,0,0,0.4)',
+				shadowBlur: 10,
+				shadowOffsetY: 5
+			}
+		}
 	}, {
 		name: '短租',
 		type: 'bar',
+		itemStyle: {
+			normal: {
+				shadowColor: 'rgba(0,0,0,0.4)',
+				shadowBlur: 10,
+				shadowOffsetY: 5
+			}
+		}
 	}, {
 		name: '分时',
 		type: 'bar',
+		itemStyle: {
+			normal: {
+				shadowColor: 'rgba(0,0,0,0.4)',
+				shadowBlur: 10,
+				shadowOffsetY: 5
+			}
+		}
 	}]
 };
 
 /********饼图*********/
-var showCenter=0;
 useIntensityPieOption = {
 	title: {
 		text: '使用强度',
@@ -371,8 +393,216 @@ function changeToPie() {
 	});
 }
 
+/**********************日均行驶里程特征************************/
+averageMileageOption = {
+	title: {
+		text: '日均行驶里程',
+		x: 'center'
+	},
+	tooltip: {
+		trigger: 'axis',
+		axisPointer: {
+			type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+		},
+		formatter: '里程：{b}千米<br/>{a0} : {c0}<br/>{a1} : {c1}<br/>{a2} : {c2}'
+	},
+	toolbox: {
+		feature: {
+			magicType:{type:['bar','line']},
+			restore: {
+				show: true
+			},
+			saveAsImage: {
+				show: true
+			}
+		}
+	},
+	legend: {
+		data: ['长租', '短租', '分时'],
+		itemGap: 5,
+		x: 'left',
+		y: 10
+	},
+	grid: {
+		left: '5%',
+		right: '4%',
+		bottom: '5%',
+		containLabel: true
+	},
+	dataZoom:[{
+		type:'inside'
+	}],
+	xAxis: [{
+		type: 'category',
+		name: '里程\n千米',
+		nameGap: 0,
+		nameLocation:'end',
+		axisTick: {
+			alignWithLabel: true
+		},
+		data: averageMileageXAis
+	}],
+	yAxis: [{
+		type: 'value',
+		name: '车辆数/辆',
+		axisLabel: {
+			formatter: '{value}'
+		}
+	}],
+	series: [{
+		name: '长租',
+		type: 'bar',
+	}, {
+		name: '短租',
+		type: 'bar',
+	}, {
+		name: '分时',
+		type: 'bar',
+	}]
+};
+
+var averageMileageWeekdayChart = echarts.init(document.getElementById('averageMileage-weekday'));
+
+averageMileageWeekdayChart.setOption(averageMileageOption);
+averageMileageWeekdayChart.setOption({
+	title: {
+			subtext: '各模式租赁车辆行驶里程分布图（工作日）'
+		},
+		series: [{
+			data: amWeekdayChangzu
+		}, {
+			data: amWeekdayDuanzu
+		}, {
+			data: amWeekdayFenshi
+		}]
+});
+
+var averageMileageWeekendChart = echarts.init(document.getElementById('averageMileage-weekend'));
+averageMileageWeekendChart.setOption(averageMileageOption);
+averageMileageWeekendChart.setOption({
+	title: {
+			subtext: '各模式租赁车辆行驶里程分布图（双休日）'
+		},
+		series: [{
+			data: amWeekendChangzu
+		}, {
+			data: amWeekendDuanzu
+		}, {
+			data: amWeekendFenshi
+		}]
+});
+
+/**********************出行时间特征************************/
+travelTimeOption = {
+	title: {
+		text: '出行时间',
+		x: 'center'
+	},
+	tooltip: {
+		trigger: 'axis',
+		axisPointer: {
+			type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+		},
+		formatter: '时间段：{b}时<br/>{a0} : {c0}<br/>{a1} : {c1}<br/>{a2} : {c2}'
+	},
+	toolbox: {
+		feature: {
+			magicType:{type:['line','bar']},
+			restore: {
+				show: true
+			},
+			saveAsImage: {
+				show: true
+			}
+		}
+	},
+	legend: {
+		data: ['长租', '短租', '分时'],
+		itemGap: 5,
+		x: 'left',
+		y: 10
+	},
+	grid: {
+		left: '5%',
+		right: '4%',
+		bottom: '5%',
+		containLabel: true
+	},
+	dataZoom:[{
+		type:'inside'
+	}],
+	xAxis: [{
+		type: 'category',
+		name: '时段\n/时',
+		nameGap: 2,
+		nameLocation:'end',
+		axisTick: {
+			alignWithLabel: true
+		},
+		axisLabel:{
+			interval:1
+		},
+		data: travelTimeXAis
+	}],
+	yAxis: [{
+		type: 'value',
+		name: '出行次数/次',
+		axisLabel: {
+			formatter: '{value}'
+		}
+	}],
+	series: [{
+		name: '长租',
+		type: 'line',
+	}, {
+		name: '短租',
+		type: 'line',
+	}, {
+		name: '分时',
+		type: 'line',
+	}]
+};
+
+var travelTimeWeekdayChart = echarts.init(document.getElementById('travelTime-weekday'));
+
+travelTimeWeekdayChart.setOption(travelTimeOption);
+travelTimeWeekdayChart.setOption({
+	title: {
+			subtext: '各模式租赁车辆出行时间分布图（工作日）'
+		},
+		series: [{
+			data: ttWeekdayChangzu
+		}, {
+			data: ttWeekdayDuanzu
+		}, {
+			data: ttWeekdayFenshi
+		}]
+});
+
+var travelTimeWeekendChart = echarts.init(document.getElementById('travelTime-weekend'));
+travelTimeWeekendChart.setOption(travelTimeOption);
+travelTimeWeekendChart.setOption({
+	title: {
+			subtext: '各模式租赁车辆出行时间分布图（双休日）'
+		},
+		series: [{
+			data: ttWeekendChangzu
+		}, {
+			data: ttWeekendDuanzu
+		}, {
+			data: ttWeekendFenshi
+		}]
+});
+
+//屏幕变化时图形跟着变化
 window.onresize = function() {
 	rtlChangZuChart.resize();
 	rtlDuanZuChart.resize();
 	rtlFenShiChart.resize();
+	useIntensityWeekdayChart.resize();
+	useIntensityWeekendChart.resize();
+	averageMileageWeekdayChart.resize();
+	averageMileageWeekendChart.resize();
+	travelTimeWeekdayChart.resize();
+	travelTimeWeekendChart.resize();
 }
