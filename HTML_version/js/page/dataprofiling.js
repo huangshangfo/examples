@@ -34,10 +34,21 @@ $(function() {
 			}
 		},
 		title: {
-			text: '基础数据'
+			useHTML: true,
+			text: '<b>基础数据</b>'
 		},
 		subtitle: {
-			text: '各月份上传数据情况'
+			text: '各月份上传数据情况',
+			style:{'color':'#ACACAC'}
+		},
+		legend:{
+			layout:'horizontal',
+			align:'right',
+			verticalAlign:'top',
+			x:-20,
+			y:25,
+			symbolPadding:2,
+			itemDistance:10
 		},
 		xAxis: {
 			categories: ['2016.08', '2016.09', '2016.10', '2016.11']
