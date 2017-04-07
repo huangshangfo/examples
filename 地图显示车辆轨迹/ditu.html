@@ -14,8 +14,7 @@
 				margin: 0;
 			}
 		</style>
-		<script type="text/javascript" src="http://api.map.baidu.com/api?
-v=2.0&ak=BOtebfvLgBMG1u0qOyxBDA9T"></script>
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=BOtebfvLgBMG1u0qOyxBDA9T"></script>
 			<title>地图</title>
 	</head>
 
@@ -27,7 +26,9 @@ v=2.0&ak=BOtebfvLgBMG1u0qOyxBDA9T"></script>
 </html>
 <script type="text/javascript">
 	// 百度地图API功能
-	var map = new BMap.Map("map");
+	var map = new BMap.Map("map",{
+		enableMapClick:false
+	});
 	var point = new BMap.Point(116.417806, 40.004292);
 	map.centerAndZoom(point, 13);
 
