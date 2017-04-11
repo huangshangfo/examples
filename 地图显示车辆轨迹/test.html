@@ -37,6 +37,7 @@
     
     var bdcoord=wgs84tobd09(ggPoint.lng,ggPoint.lat);
     var gp=new BMap.Point(bdcoord[0],bdcoord[1]);
+    console.log(gp);
     var mark= new BMap.Marker(gp);
    	bm.addOverlay(mark); //添加GPS marker
 
