@@ -69,7 +69,7 @@ pre{
 table{
 	top: 15px;
 	background-color: transparent;
-	border:none;
+	border-color:red;
 }
 
 #my_th{
